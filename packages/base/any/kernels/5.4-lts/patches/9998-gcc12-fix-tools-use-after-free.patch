@@ -1,0 +1,30 @@
+From: ONL Maintainers
+Subject: Fix GCC 12+ use-after-free warnings in kernel tools
+Date: 2025-10-29
+
+GCC 12 introduces a new warning for potentially unsafe uses of pointers
+after realloc(). The xrealloc() function in tools/lib/subcmd/subcmd-util.h
+triggers this warning because it references the old pointer in error paths.
+
+This patch adds pragmas to suppress the warning for this specific function
+where the pattern is intentional and safe.
+
+--- a/tools/lib/subcmd/subcmd-util.h
++++ b/tools/lib/subcmd/subcmd-util.h
+@@ -48,6 +48,10 @@ static NORETURN inline void die(const char * err, ...)
+ 
+ static inline void *xrealloc(void *ptr, size_t size)
+ {
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Wuse-after-free"
+ 	void *ret = realloc(ptr, size);
+ 	if (!ret && !size)
+ 		ret = realloc(ptr, 1);
+@@ -56,6 +60,7 @@ static inline void *xrealloc(void *ptr, size_t size)
+ 		ret = realloc(ptr, 1);
+ 		if (!ret)
+ 			die("Out of memory, realloc failed");
++#pragma GCC diagnostic pop
+ 	}
+ 	return ret;
+ }

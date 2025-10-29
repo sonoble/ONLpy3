@@ -7,3 +7,4 @@
 0005-enable-kernel-spcr.patch
 driver-add-intel-imc-smbus.patch
 9999-gcc10-fix-relocs-multiple-definition.patch
+9998-gcc12-fix-tools-use-after-free.patch
