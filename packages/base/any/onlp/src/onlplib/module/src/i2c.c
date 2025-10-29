@@ -33,6 +33,8 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <errno.h>
+#include <linux/i2c-dev.h>
+#include <i2c/smbus.h>
 #include <onlp/onlp.h>
 #include "onlplib_log.h"
 

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 ############################################################
 #
 # This script generates a repository skeleton for a new
@@ -88,7 +88,7 @@ class NOSFile(object):
 
     def write(self, stdout=False, overwrite=False, dry=False):
         if stdout:
-            print self.etemplate
+            print(self.etemplate)
         else:
             abspath = os.path.join(self.root, self.epath)
             if not os.path.isdir(os.path.dirname(abspath)):
@@ -505,7 +505,7 @@ class OnlVersionImplementation(object):
             # The current branch is used as the release version.
             self.release = False
             cmd = ('git', 'rev-parse', '--abbrev-ref', 'HEAD')
-            branch = subprocess.check_output(cmd).strip()
+            branch = subprocess.check_output(cmd).decode('utf-8').strip()
             self.PRODUCTS[0]['version'] = branch
 
     def V_OS_NAME(self, data):
@@ -1168,6 +1168,6 @@ if __name__ == '__main__':
 
     for obj in OBJECTS:
         if ops.list_files:
-            print "%-60s" % (obj.epath)
+            print("%-60s") % (obj.epath)
         if ops.write_files:
             obj.write(overwrite=ops.overwrite, dry=ops.dry)

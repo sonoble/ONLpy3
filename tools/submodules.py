@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
 ############################################################
 # <bsn.cl fy=2013 v=none>
 #
@@ -35,7 +35,11 @@ def check_output(cmd, *args, **kwargs):
         logger.debug("+ " + cmd)
     else:
         logger.debug("+ " + " ".join(cmd))
-    return subprocess.check_output(cmd, *args, **kwargs)
+    # In Python 3, subprocess.check_output returns bytes, so decode to string
+    output = subprocess.check_output(cmd, *args, **kwargs)
+    if isinstance(output, bytes):
+        return output.decode('utf-8')
+    return output
 
 
 class OnlSubmoduleError(Exception):
@@ -104,7 +108,7 @@ class OnlSubmoduleManager(object):
         for script in os.getenv("ONL_SUBMODULE_UPDATED_SCRIPTS", "").split(':'):
             if os.path.exists(script):
                 try:
-                    print "Calling %s..." % script
+                    print ("Calling %s...") % script
                     check_call([script, path], cwd=self.root)
                 except subprocess.CalledProcessError:
                     raise OnlSubmoduleError("The repository post-init script %s failed." % script)
@@ -131,6 +135,6 @@ if __name__ == '__main__':
     try:
         sm = OnlSubmoduleManager(ops.root)
         sm.require(ops.path)
-    except OnlSubmoduleError, e:
+    except OnlSubmoduleError as e:
         logger.error("%s" % e.value)
 

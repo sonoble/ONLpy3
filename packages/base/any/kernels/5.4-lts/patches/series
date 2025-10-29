@@ -6,3 +6,4 @@
 0004-driver-regmap_i2c-support-smbus-16-bit-reg.patch
 0005-enable-kernel-spcr.patch
 driver-add-intel-imc-smbus.patch
+9999-gcc10-fix-relocs-multiple-definition.patch

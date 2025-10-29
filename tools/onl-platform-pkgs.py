@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python
 ############################################################
 #
 # This script expects a yaml file containing the list
@@ -41,7 +41,7 @@ if not ops.no_builtins:
 
 for p in platforms:
     for pattern in PATTERNS:
-        print "- ", pattern % dict(platform=p)
+        print("- ", pattern % dict(platform=p))
 
 
 

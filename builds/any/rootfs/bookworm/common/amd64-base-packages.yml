@@ -1,0 +1,15 @@
+############################################################
+#
+# Common packages for all amd64 systems.
+#
+############################################################
+- dmidecode
+- parted
+- smartmontools
+- grub2
+- onl-upgrade
+- onl-kernel-5.4-lts-x86-64-all-modules
+- onl-kernel-6.1-lts-x86-64-all-modules
+- efibootmgr
+- gdisk
+- acpid

@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 ############################################################
 #
 # Build an ONL Installer
@@ -67,7 +67,7 @@ class InstallerShar(object):
         sys.exit(1)
 
     def find_file(self, package, filename):
-        return subprocess.check_output("onlpm --find-file %s %s" % (package, filename), shell=True).strip()
+        return subprocess.check_output("onlpm --find-file %s %s" % (package, filename), shell=True).decode('utf-8').strip()
 
     def setvar(self, name, value):
         self.template = self.template.replace("@%s@" % name, value)
@@ -76,14 +76,14 @@ class InstallerShar(object):
         self.initrd = self.find_file(package, filename)
         self.add_file(self.initrd)
         if add_platforms:
-            for platform in subprocess.check_output("onlpm --platform-manifest %s" % (package), shell=True).split():
-                logger.info("Adding platform %s..." % platform)
+            for platform in subprocess.check_output("onlpm --platform-manifest %s" % (package), shell=True).decode('utf-8').split():
+                logger.info("Adding platform %s...." % platform)
                 kernel = subprocess.check_output([os.path.join(self.ONL, 'tools', 'onlplatform.py'),
                                                   platform,
                                                   self.arch,
-                                                  'kernel']).strip()
+                                                  'kernel']).decode('utf-8').strip()
 
-                logger.info("Platform %s using kernel %s..." % (platform, os.path.basename(kernel)))
+                logger.info("Platform %s using kernel %s...." % (platform, os.path.basename(kernel)))
                 self.add_file(kernel)
 
         self.setvar('INITRD_ARCHIVE', os.path.basename(self.initrd))
@@ -94,7 +94,7 @@ class InstallerShar(object):
     def add_fit(self, package, filename, add_platforms=True):
         self.fit = self.find_file(package, filename)
         VONL=os.path.join(self.ONL, "packages", "base", "all", "vendor-config-onl")
-        offsets = subprocess.check_output("PYTHONPATH=%s/src/python %s/src/bin/pyfit -v offset %s --initrd" % (VONL, VONL, self.fit), shell=True).split()
+        offsets = subprocess.check_output("PYTHONPATH=%s/src/python %s/src/bin/pyfit -v offset %s --initrd" % (VONL, VONL, self.fit), shell=True).decode('utf-8').split()
         self.setvar('INITRD_ARCHIVE', os.path.basename(self.fit))
         self.setvar('INITRD_OFFSET', offsets[0])
         self.setvar('INITRD_SIZE', str(int(offsets[1]) - int(offsets[0])))
@@ -104,7 +104,7 @@ class InstallerShar(object):
         if not os.path.exists(filename):
             self.abort("File %s does not exist." % filename)
 
-        logger.info("Adding file %s..." % os.path.basename(filename))
+        logger.info("Adding file %s...." % os.path.basename(filename))
         self.files.append(filename)
         self.files = list(set(self.files))
 
@@ -123,7 +123,7 @@ class InstallerShar(object):
     def add_dir(self, dir_):
         if not os.path.isdir(dir_):
             self.abort("Directory %s does not exist." % dir_)
-        logger.info("Adding dir %s..." % dir_)
+        logger.info("Adding dir %s...." % dir_)
         self.dirs.append(dir_)
         self.dirs = list(set(self.dirs))
 
@@ -142,7 +142,7 @@ class InstallerShar(object):
             shutil.copy(f, self.work_dir)
 
         for d in self.dirs:
-            print "Copying %s -> %s..." % (d, self.work_dir)
+            print("Copying %s -> %s....")% (d, self.work_dir)
             subprocess.check_call(["cp", "-R", d, self.work_dir])
 
         with open(os.path.join(self.work_dir, 'installer.sh'), "w") as f:

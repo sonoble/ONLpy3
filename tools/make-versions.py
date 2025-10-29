@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 ############################################################
 import os
 import sys
@@ -26,7 +26,7 @@ class OnlVersionsGenerator(object):
             self.build_sha1 = ops.sha1
         else:
             cmd = ('git', 'rev-list', 'HEAD', '-1',)
-            self.build_sha1 = subprocess.check_output(cmd).strip()
+            self.build_sha1 = subprocess.check_output(cmd).decode('utf-8').strip()
 
         if ops.timestamp:
             self.build_timestamp = ops.timestamp

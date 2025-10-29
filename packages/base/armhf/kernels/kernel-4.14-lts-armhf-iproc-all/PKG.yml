@@ -1,1 +1,0 @@
-!include $ONL/packages/base/any/kernels/lts/APKG.yml VERSION=4.14 ARCH=armhf CONFIG=armhf-iproc-all

@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 ############################################################
 #
 # Common utilities for the ONL python tools.
@@ -6,7 +6,10 @@
 ############################################################
 import logging
 import subprocess
-from collections import Iterable
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 import sys
 import os
 import fcntl
@@ -121,7 +124,7 @@ def execute(args, sudo=False, chroot=None, ex=None):
         try:
             subprocess.check_call(args, shell=shell)
             rv = 0
-        except subprocess.CalledProcessError, e:
+        except subprocess.CalledProcessError as e:
             if ex:
                 raise ex
             rv = e.returncode
@@ -132,7 +135,8 @@ def execute(args, sudo=False, chroot=None, ex=None):
 # Flatten lists if string lists
 def sflatten(coll):
     for i in coll:
-            if isinstance(i, Iterable) and not isinstance(i, basestring):
+            # Python 3: basestring doesn't exist, use str instead
+            if isinstance(i, Iterable) and not isinstance(i, str):
                 for subc in sflatten(i):
                     if subc:
                         yield subc
@@ -161,10 +165,10 @@ def userdel(username):
     # Can't use the userdel command because of potential uid 0 in-user problems while running ourselves
     for line in fileinput.input('/etc/passwd', inplace=True):
         if not line.startswith('%s:' % username):
-            print line,
+            print(line,)
     for line in fileinput.input('/etc/shadow', inplace=True):
         if not line.startswith('%s:' % username):
-            print line,
+            print(line,)
 
 ############################################################
 #
@@ -227,7 +231,7 @@ def filepath(absdir, relpath, eklass, required=True):
 
     # Globs that result in a single file are allowed:
     g = glob.glob(p)
-    if len(g) is 0:
+    if len(g) == 0:
         if required:
             raise eklass("'%s' did not match any files." % p)
     elif len(g) > 1:
@@ -240,12 +244,12 @@ def filepath(absdir, relpath, eklass, required=True):
 def validate_src_dst_file_tuples(absdir, data, dstsubs, eklass, required=True):
     files = []
     if type(data) is dict:
-        for (s,d) in data.iteritems():
+        for (s,d) in data.items():
             files.append((s,d))
     elif type(data) is list:
         for e in data:
             if type(e) is dict:
-                for (s,d) in e.iteritems():
+                for (s,d) in e.items():
                     files.append((s,d))
             elif type(e) in [ list, tuple ]:
                 if len(e) != 2:

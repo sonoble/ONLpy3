@@ -357,9 +357,8 @@ onlp_onie_show(onlp_onie_info_t* info, aim_pvs_t* pvs)
     if(info->serial_number) {
         iof_iprintf(&iof, "Serial Number: %s", info->serial_number);
     }
-    if(info->mac) {
-        iof_iprintf(&iof, "MAC: %{mac}", info->mac);
-    }
+    /* mac is an array, always exists, just print it */
+    iof_iprintf(&iof, "MAC: %{mac}", info->mac);
     if(info->mac_range) {
         iof_iprintf(&iof, "MAC Range: %d", info->mac_range);
     }
