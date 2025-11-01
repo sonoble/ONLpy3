@@ -17,8 +17,46 @@
 #include <errno.h>
 #include <time.h>
 #include <sys/stat.h>
+#include <linux/i2c.h>
+#include <linux/i2c-dev.h>
 #include <onlplib/i2c.h>
 #include "platform.h"
+
+/* SMBus constants not always defined in older headers */
+#ifndef I2C_SMBUS_BLOCK_DATA
+#define I2C_SMBUS_BLOCK_DATA 5
+#endif
+
+#ifndef I2C_SMBUS_READ
+#define I2C_SMBUS_READ  1
+#endif
+
+#ifndef I2C_SMBUS_BLOCK_MAX
+#define I2C_SMBUS_BLOCK_MAX 32
+#endif
+
+/* Local implementation of i2c_smbus_read_block_data using ioctl */
+static inline __s32 i2c_smbus_read_block_data(int file, __u8 command, __u8 *values)
+{
+    union i2c_smbus_data data;
+    int i, res;
+    struct i2c_smbus_ioctl_data args;
+
+    args.read_write = I2C_SMBUS_READ;
+    args.command = command;
+    args.size = I2C_SMBUS_BLOCK_DATA;
+    args.data = &data;
+
+    res = ioctl(file, I2C_SMBUS, &args);
+    if (res < 0)
+        return res;
+
+    /* Block read returns count in data.block[0] */
+    for (i = 1; i <= data.block[0]; i++)
+        values[i-1] = data.block[i];
+
+    return data.block[0];
+}
 
 char command[256];
 FILE *fp;

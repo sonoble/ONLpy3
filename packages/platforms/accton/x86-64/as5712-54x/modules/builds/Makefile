@@ -1,5 +1,6 @@
-KERNELS := onl-kernel-4.14-lts-x86-64-all:amd64
-KMODULES := $(wildcard *.c)
+KERNELS := onl-kernel-5.4-lts-x86-64-all:amd64
+# Build cpld, fan, leds, and psu together as single combined module
+KMODULES := as5712_combined
 VENDOR := accton
 BASENAME := x86-64-accton-as5712-54x
 ARCH := x86_64

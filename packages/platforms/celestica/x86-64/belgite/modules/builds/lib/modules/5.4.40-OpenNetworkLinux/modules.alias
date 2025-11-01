@@ -1,0 +1,3 @@
+# Aliases extracted from modules themselves.
+alias i2c:fsp550 platform_psu
+alias i2c:fan platform_fan
