@@ -73,7 +73,6 @@ static ssize_t show_vout_by_mode(struct device *dev, struct device_attribute *da
 static ssize_t show_ascii(struct device *dev, struct device_attribute *da,
 			 char *buf);
 static struct dps850_data *dps850_update_device(struct device *dev);
-static int dps850_write_word(struct i2c_client *client, u8 reg, u16 value);
 
 enum dps850_sysfs_attributes {
 	PSU_V_IN,
@@ -280,7 +279,11 @@ exit:
 	return status;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,18,0)
+static void dps850_remove(struct i2c_client *client)
+#else
 static int dps850_remove(struct i2c_client *client)
+#endif
 {
 	struct dps850_data *data = i2c_get_clientdata(client);
 
@@ -288,7 +291,9 @@ static int dps850_remove(struct i2c_client *client)
 	sysfs_remove_group(&client->dev.kobj, &dps850_group);
 	kfree(data);
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,18,0)
 	return 0;
+#endif
 }
 
 static const struct i2c_device_id dps850_id[] = {
@@ -332,24 +337,6 @@ static int dps850_read_word(struct i2c_client *client, u8 reg)
 
 	while (retry) {
 		status = i2c_smbus_read_word_data(client, reg);
-		if (unlikely(status < 0)) {
-			msleep(I2C_RW_RETRY_INTERVAL);
-			retry--;
-			continue;
-		}
-
-		break;
-	}
-
-	return status;
-}
-
-static int dps850_write_word(struct i2c_client *client, u8 reg, u16 value)
-{
-	int status = 0, retry = I2C_RW_RETRY_COUNT;
-
-	while (retry) {
-		status = i2c_smbus_write_word_data(client, reg, value);
 		if (unlikely(status < 0)) {
 			msleep(I2C_RW_RETRY_INTERVAL);
 			retry--;

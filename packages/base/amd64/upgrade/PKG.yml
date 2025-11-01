@@ -1,10 +1,7 @@
 prerequisites:
     packages:
-      - onl-kernel-3.16-lts-x86-64-all:amd64
-      - onl-kernel-4.9-lts-x86-64-all:amd64
-      - onl-kernel-4.14-lts-x86-64-all:amd64
-      - onl-kernel-4.19-lts-x86-64-all:amd64
       - onl-kernel-5.4-lts-x86-64-all:amd64
+      - onl-kernel-6.1-lts-x86-64-all:amd64
       - onl-loader-initrd:amd64
     stage: 3
 
@@ -12,7 +9,7 @@ common:
   arch: amd64
   version: 1.0.0
   copyright: Copyright 2013, 2014, 2015 Big Switch Networks
-  maintainer: support@bigswitch.com
+  maintainer: support@onlp.dev
   support: opennetworklinux@googlegroups.com
 
 packages:

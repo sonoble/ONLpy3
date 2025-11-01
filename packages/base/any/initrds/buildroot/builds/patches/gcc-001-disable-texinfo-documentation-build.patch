@@ -1,0 +1,63 @@
+Disable GCC texinfo documentation generation during build
+
+GCC 4.6.3 documentation has texinfo syntax errors that fail to build with
+modern versions of makeinfo. Since we don't need the documentation for the
+cross-compiler toolchain, disable it entirely by setting MAKEINFO=true.
+
+Also set MISSING=texinfo in the GCC_CONF_ENV to prevent configure from
+detecting and attempting to use texinfo tools.
+
+This fixes build errors like:
+gcc.texi:89: warning: @tex should only appear at the beginning of a line
+gcc.texi:209: no matching `@end tex'
+make[8]: *** [Makefile:4270: doc/gcc.info] Error 1
+
+Signed-off-by: Claude Code <noreply@anthropic.com>
+
+--- a/toolchain/gcc/gcc-uclibc-4.x.mk
++++ b/toolchain/gcc/gcc-uclibc-4.x.mk
+@@ -233,8 +233,10 @@ endif
+ # gcc version < 4.2.0 don't have -Wno-overlength-strings and the configure
+ # script has problems detecting it, so help it
+ ifeq ($(shell test $(HOSTCC_VERSION) -lt 420 && echo OLD),OLD)
+-GCC_CONF_ENV:=acx_cv_prog_cc_pedantic__Wno_long_long__Wno_variadic_macros_____________Wno_overlength_strings=no \
++GCC_CONF_ENV:=MISSING=texinfo acx_cv_prog_cc_pedantic__Wno_long_long__Wno_variadic_macros_____________Wno_overlength_strings=no \
+ 	acx_cv_prog_cc_warning__Wno_overlength_strings=no
++else
++GCC_CONF_ENV:=MISSING=texinfo
+ endif
+
+ ifeq ($(BR2_TOOLCHAIN_BUILDROOT),y)
+@@ -320,9 +322,9 @@ $(GCC_BUILD_DIR1)/.configured: $(GCC_DIR)/.patched
+ $(GCC_BUILD_DIR1)/.compiled: $(GCC_BUILD_DIR1)/.configured
+ 	$(Q)$(call MESSAGE,"Building gcc pass-1")
+ ifeq ($(BR2_GCC_SUPPORTS_FINEGRAINEDMTUNE),y)
+-	$(GCC_CONF_ENV) $(MAKE) -C $(GCC_BUILD_DIR1) all-gcc
++	$(GCC_CONF_ENV) $(MAKE) -C $(GCC_BUILD_DIR1) MAKEINFO=true all-gcc
+ else
+-	$(MAKE) -C $(GCC_BUILD_DIR1) all-gcc
++	$(MAKE) -C $(GCC_BUILD_DIR1) MAKEINFO=true all-gcc
+ endif
+ 	touch $@
+
+@@ -390,9 +392,9 @@ $(GCC_BUILD_DIR2)/.compiled: $(GCC_BUILD_DIR2)/.configured
+ 	$(Q)$(call MESSAGE,"Building gcc pass-2")
+ 	# gcc >= 4.3.0 have to also build all-target-libgcc
+ ifeq ($(BR2_GCC_SUPPORTS_FINEGRAINEDMTUNE),y)
+-	$(GCC_CONF_ENV) $(MAKE) -C $(GCC_BUILD_DIR2) all-gcc all-target-libgcc
++	$(GCC_CONF_ENV) $(MAKE) -C $(GCC_BUILD_DIR2) MAKEINFO=true all-gcc all-target-libgcc
+ else
+-	$(MAKE) -C $(GCC_BUILD_DIR2) all-gcc
++	$(MAKE) -C $(GCC_BUILD_DIR2) MAKEINFO=true all-gcc
+ endif
+ 	touch $@
+
+@@ -468,7 +470,7 @@ $(GCC_BUILD_DIR3)/.configured: $(GCC_SRC_DIR)/.patched $(GCC_STAGING_PREREQ)
+
+ $(GCC_BUILD_DIR3)/.compiled: $(GCC_BUILD_DIR3)/.configured
+ 	$(Q)$(call MESSAGE,"Building gcc final")
+-	$(GCC_CONF_ENV) $(MAKE) -C $(GCC_BUILD_DIR3) all
++	$(GCC_CONF_ENV) $(MAKE) -C $(GCC_BUILD_DIR3) MAKEINFO=true all
+ 	touch $@
+
+ $(GCC_BUILD_DIR3)/.installed: $(GCC_BUILD_DIR3)/.compiled

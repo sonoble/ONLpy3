@@ -590,7 +590,11 @@ exit:
     return status;
 }
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,18,0)
+static void ym2651y_remove(struct i2c_client *client)
+#else
 static int ym2651y_remove(struct i2c_client *client)
+#endif
 {
     struct ym2651y_data *data = i2c_get_clientdata(client);
 
@@ -598,7 +602,9 @@ static int ym2651y_remove(struct i2c_client *client)
     sysfs_remove_group(&client->dev.kobj, &ym2651y_group);
     kfree(data);
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,18,0)
     return 0;
+#endif
 }
 
 static const struct i2c_device_id ym2651y_id[] = {

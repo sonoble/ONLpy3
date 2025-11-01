@@ -11,20 +11,20 @@ where the pattern is intentional and safe.
 
 --- a/tools/lib/subcmd/subcmd-util.h
 +++ b/tools/lib/subcmd/subcmd-util.h
-@@ -48,6 +48,10 @@ static NORETURN inline void die(const char * err, ...)
- 
+@@ -50,6 +50,8 @@ static inline void *xrealloc(void *ptr, size_t size)
  static inline void *xrealloc(void *ptr, size_t size)
  {
+ 	void *ret = realloc(ptr, size);
 +#pragma GCC diagnostic push
 +#pragma GCC diagnostic ignored "-Wuse-after-free"
- 	void *ret = realloc(ptr, size);
  	if (!ret && !size)
  		ret = realloc(ptr, 1);
-@@ -56,6 +60,7 @@ static inline void *xrealloc(void *ptr, size_t size)
- 		ret = realloc(ptr, 1);
+ 	if (!ret) {
+@@ -59,6 +61,7 @@ static inline void *xrealloc(void *ptr, size_t size)
  		if (!ret)
  			die("Out of memory, realloc failed");
-+#pragma GCC diagnostic pop
  	}
++#pragma GCC diagnostic pop
  	return ret;
  }
+

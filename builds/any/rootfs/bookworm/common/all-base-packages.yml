@@ -34,7 +34,7 @@
 - python3-cherrypy3
 - python3-tz
 - python3-scapy
-- python3-pypcap
+# python3-pypcap - not available in Debian Bookworm, functionality in python3-scapy
 - snmpd
 - snmp
 - pciutils
@@ -79,7 +79,7 @@
 - sysstat
 - tmux
 - lm-sensors
-- hddtemp
+# hddtemp - obsoleted in Debian Bookworm, replaced by smartmontools/drivetemp kernel module
 - bc
 - vim
 - htop

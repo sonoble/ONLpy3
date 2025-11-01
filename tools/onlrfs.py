@@ -208,8 +208,12 @@ class OnlMultistrapConfig(object):
         self.localrepos = []
 
     def generate_handle(self, handle):
+        # Determine if we're writing bytes or strings
+        is_binary = hasattr(handle, 'mode') and 'b' in handle.mode
+
         for (name, fields) in self.config.items():
-            handle.write("[%s]\n" % name)
+            data = '[%s]\n' % name
+            handle.write(data.encode('utf-8') if is_binary else data)
             for (k,v) in fields.items():
 
                 if type(v) is bool:
@@ -224,12 +228,13 @@ class OnlMultistrapConfig(object):
                 if k == 'packages' and type(v) is list:
                     raise OnlRfsError("packages=%s" % v)
 
-                handle.write("%s=%s\n" % (k, v))
-            handle.write("\n")
+                data = "%s=%s\n" % (k, v)
+                handle.write(data.encode('utf-8') if is_binary else data)
+            handle.write(b"\n" if is_binary else "\n")
 
     def generate_file(self, fname=None):
         if fname is None:
-            h = tempfile.NamedTemporaryFile(delete=False)
+            h = tempfile.NamedTemporaryFile(mode='wb', delete=False)
             fname = h.name
         elif fname == '-' or fname == 'stdout':
             h = sys.stdout
@@ -271,6 +276,14 @@ class OnlRfsContext(object):
 
     def __enter__(self):
         try:
+            # Ensure dev and proc directories exist before mounting
+            if not os.path.exists(self.dev):
+                onlu.execute("sudo mkdir -p %s" % self.dev,
+                             ex=OnlRfsError("Could not create dev directory in rfs."))
+            if not os.path.exists(self.proc):
+                onlu.execute("sudo mkdir -p %s" % self.proc,
+                             ex=OnlRfsError("Could not create proc directory in rfs."))
+
             onlu.execute("sudo mount -t devtmpfs dev %s" % self.dev,
                          ex=OnlRfsError("Could not mount dev in rfs."))
             onlu.execute("sudo mount -t proc proc %s" % self.proc,
@@ -377,8 +390,40 @@ class OnlRfsBuilder(object):
             onlu.execute("sudo rm -rf %s" % dir_,
                          ex=OnlRfsError("Could not remove target directory."))
 
-        if onlu.execute("sudo %s -d %s -f %s" % (self.MULTISTRAP, dir_, msconfig)) == 100:
-            raise OnlRfsError("Multistrap APT failure.")
+        # Pre-create directory structure and apt config for multistrap
+        onlu.execute("sudo mkdir -p %s/etc/apt/apt.conf.d" % dir_,
+                     ex=OnlRfsError("Could not create apt config directory."))
+
+        apt_conf_path = os.path.join(dir_, "etc/apt/apt.conf.d/99allow-insecure")
+        apt_config_content = '''Acquire::AllowInsecureRepositories "true";
+Acquire::AllowDowngradeToInsecureRepositories "true";
+APT::Get::AllowUnauthenticated "true";
+'''
+        # Write apt config file using a temp file and sudo cp
+        temp_apt_conf = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.conf')
+        temp_apt_conf.write(apt_config_content)
+        temp_apt_conf.close()
+        onlu.execute("sudo cp %s %s" % (temp_apt_conf.name, apt_conf_path),
+                     ex=OnlRfsError("Could not create apt config file."))
+        os.unlink(temp_apt_conf.name)
+
+        # Also create a temporary apt config for the multistrap process itself
+        apt_config = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.conf')
+        apt_config.write(apt_config_content)
+        apt_config.close()
+
+        try:
+            if onlu.execute("sudo APT_CONFIG=%s %s -d %s -f %s" % (apt_config.name, self.MULTISTRAP, dir_, msconfig)) == 100:
+                raise OnlRfsError("Multistrap APT failure.")
+        finally:
+            os.unlink(apt_config.name)
+
+        # Ensure basic directory structure exists after multistrap
+        for d in ['tmp', 'proc', 'dev', 'sys']:
+            path = os.path.join(dir_, d)
+            if not os.path.exists(path):
+                onlu.execute("sudo mkdir -p %s" % path,
+                             ex=OnlRfsError("Could not create %s directory in rootfs." % d))
 
         if os.getenv("MULTISTRAP_DEBUG"):
             raise OnlRfsError("Multistrap debug.")
@@ -394,6 +439,27 @@ class OnlRfsBuilder(object):
 
         onlu.execute('sudo cp %s %s' % (os.path.join(os.getenv('ONL'), 'tools', 'scripts', 'base-files.postinst'),
                                         os.path.join(dir_, 'var', 'lib', 'dpkg', 'info', 'base-files.postinst')));
+
+        # Fix malformed dpkg status file (Debian Bookworm issue with trailing whitespace in Conffiles)
+        dpkg_status = os.path.join(dir_, 'var', 'lib', 'dpkg', 'status')
+        dpkg_status_fixed = dpkg_status + '.fixed'
+        # Use Python to strip trailing whitespace from all lines
+        fix_script_file = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.py')
+        fix_script_file.write("""import sys
+with open(sys.argv[1], 'r') as f:
+    lines = f.readlines()
+with open(sys.argv[2], 'w') as f:
+    for line in lines:
+        f.write(line.rstrip() + '\\n')
+""")
+        fix_script_file.close()
+        try:
+            onlu.execute("sudo python3 %s %s %s" % (fix_script_file.name, dpkg_status, dpkg_status_fixed),
+                         ex=OnlRfsError("Could not fix dpkg status file."))
+            onlu.execute("sudo mv %s %s" % (dpkg_status_fixed, dpkg_status),
+                         ex=OnlRfsError("Could not replace dpkg status file."))
+        finally:
+            os.unlink(fix_script_file.name)
 
         script = os.path.join(dir_, "tmp/configure.sh")
         with open(script, "w") as f:

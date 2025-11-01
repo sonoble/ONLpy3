@@ -1,0 +1,25 @@
+Fix deprecated find -perm +mode syntax for modern find versions
+
+Modern versions of GNU find (4.5.12+) have deprecated the -perm +mode syntax
+and require -perm /mode instead. The '+' syntax causes "invalid mode" errors
+on systems with newer findutils.
+
+This fixes the build error:
+find: invalid mode '+111'
+
+The -perm /111 syntax means "any of these permission bits are set" which is
+the same as the old +111 syntax.
+
+Signed-off-by: Claude Code <noreply@anthropic.com>
+
+--- a/Makefile
++++ b/Makefile
+@@ -444,7 +444,7 @@ STRIP_FIND_CMD = find $(TARGET_DIR)
+ ifneq (,$(call qstrip,$(BR2_STRIP_EXCLUDE_DIRS)))
+ STRIP_FIND_CMD += \( $(call finddirclauses,$(TARGET_DIR),$(call qstrip,$(BR2_STRIP_EXCLUDE_DIRS))) \) -prune -o
+ endif
+-STRIP_FIND_CMD += -type f -perm +111
++STRIP_FIND_CMD += -type f -perm /111
+ STRIP_FIND_CMD += -not \( $(call findfileclauses,libpthread*.so* $(call qstrip,$(BR2_STRIP_EXCLUDE_FILES))) \) -print
+
+ target-finalize:

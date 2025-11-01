@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y \
         debhelper \
         debhelper \
         debhelper \
+	debian-archive-keyring \
 	device-tree-compiler \
         devscripts \
         devscripts \
@@ -115,11 +116,11 @@ RUN apt-get install -y \
 chrpath devscripts dh-autoreconf flex \
 libcap-dev libc-ares-dev libjson-c-dev libpam0g-dev libpcre2-dev \
 libreadline-dev libsystemd-dev pkg-config \
-texlive-plain-generic texinfo texlive-latex-base
+texlive-plain-generic texinfo texlive-latex-base apt-cacher-ng
 
 # Ruby gems
 RUN     gem install rake
-RUN     gem install --version 1.3.3 fpm
+RUN     gem install fpm
 
 #
 # The i2c-dev.h user/kernel header conflict is a nightmare.

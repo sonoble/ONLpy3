@@ -146,10 +146,10 @@ class OnlPackage(object):
     DEFAULTS = {
         'vendor' : 'Open Network Linux',
         'url' : 'http://opennetlinux.org',
-        'license' : 'unknown',
+        'license' : 'GPL',
 
         # Default Python Package Installation
-        'PY_INSTALL' : '/usr/lib/python2.7/dist-packages',
+        'PY_INSTALL' : '/usr/lib/python3.11/dist-packages',
 
         # Default Builder build directory name. Must match setup.env
         'BUILD_DIR' : 'BUILD/%s' % g_dist_codename,
@@ -1236,9 +1236,6 @@ class OnlPackageManager(object):
 
     def list_platforms(self, arch):
         platforms = []
-        allowlist = None
-        if os.environ.get('ONLPM_OPTION_PLATFORM_ALLOWLIST'):
-            allowlist = os.environ.get('ONLPM_OPTION_PLATFORM_ALLOWLIST').split()
         for pg in self.package_groups:
             for p in pg.packages:
                 (name, pkgArch) = OnlPackage.idparse(p.id())

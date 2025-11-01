@@ -86,7 +86,7 @@ class App(SubprocessMixin, object):
             sys.stdout.write("\n")
 
             self.log.debug("+ chmod +x %s", p)
-            os.chmod(p, 0755)
+            os.chmod(p, 0o755)
 
             env = {}
             env.update(os.environ)

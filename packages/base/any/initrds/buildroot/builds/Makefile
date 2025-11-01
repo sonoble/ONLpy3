@@ -34,6 +34,10 @@ setup: setup-pyroute2 setup-dnspython setup-libyaml setup-pyyaml setup-jq setup-
 	cp $(wildcard patches/openssl*.patch) $(BUILDROOT_SOURCE)/package/openssl/
 	rm -f $(BUILDROOT_SOURCE)/package/openssl/openssl-do-not-build-docs.patch
 	cp $(wildcard patches/uboot*.patch) $(BUILDROOT_SOURCE)/package/uboot-tools/
+	mkdir -p $(BUILDROOT_SOURCE)/package/uclibc
+	ln -sf ../../toolchain/uClibc/uClibc-0.9.33.config $(BUILDROOT_SOURCE)/package/uclibc/uClibc-0.9.33.config
+	cd $(BUILDROOT_SOURCE) && patch -p1 < ../patches/buildroot-001-fix-find-perm-deprecated-syntax.patch
+	cd $(BUILDROOT_SOURCE) && patch -p1 < ../patches/gcc-001-disable-texinfo-documentation-build.patch
 	sed -i 's%^DOSFSTOOLS_SITE =.*%DOSFSTOOLS_SITE = http://downloads.openwrt.org/sources%' $(BUILDROOT_SOURCE)/package/dosfstools/dosfstools.mk
 	sed -i 's%^UEMACS_SITE =.*%UEMACS_SITE = http://www.kernel.org/pub/linux/kernel/uemacs%;s%^UEMACS_SOURCE =.*%UEMACS_SOURCE = em-$$(UEMACS_VERSION).tar.gz%' $(BUILDROOT_SOURCE)/package/uemacs/uemacs.mk
 	mkdir -p $(BUILDROOT_ARCHDIRS)

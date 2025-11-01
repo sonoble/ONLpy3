@@ -108,7 +108,7 @@ class OnlSubmoduleManager(object):
         for script in os.getenv("ONL_SUBMODULE_UPDATED_SCRIPTS", "").split(':'):
             if os.path.exists(script):
                 try:
-                    print ("Calling %s...") % script
+                    print("Calling %s..." % script)
                     check_call([script, path], cwd=self.root)
                 except subprocess.CalledProcessError:
                     raise OnlSubmoduleError("The repository post-init script %s failed." % script)

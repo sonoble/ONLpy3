@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/python3
 
 """mkshar
 
@@ -94,7 +94,10 @@ def _zipopts(path):
         return ZIP_COMPRESS_OPTS
 
 # block to 512 bytes
-buf = open(sfx).read()
+# Read as bytes from the start to avoid encoding issues
+buf = open(sfx, 'rb').read()
+# Convert to string for find/replace operations
+buf = buf.decode('utf-8')
 sz = len(buf)
 logger.info("script size is %d bytes", sz)
 rem = sz % opts.blocksize
@@ -182,16 +185,17 @@ if opts.inplace:
 else:
     _spliceMaybe('SFX_INPLACE', '')
 
-# remember the checksum offset
-ckStart = buf.find("SFX_CHECKSUM=")
-ckEnd = buf.find("\n", ckStart+1)
+# remember the checksum offset (in bytes for binary file operations)
+buf_for_find = buf.encode('utf-8') if isinstance(buf, str) else buf
+ckStart = buf_for_find.find(b"SFX_CHECKSUM=")
+ckEnd = buf_for_find.find(b"\n", ckStart+1)
 
 logger.info("generating shar")
 
 if opts.unzip_pad:
 
-    wfd = open(shar, "w+")
-    rfd = open(zipFile, "r")
+    wfd = open(shar, "wb+")
+    rfd = open(zipFile, "rb")
     shutil.copyfileobj(rfd, wfd)
     rfd.close()
 
@@ -201,7 +205,7 @@ if opts.unzip_pad:
 
     logger.info("splicing in SFX")
     wfd.seek(0, 0)
-    wfd.write(buf)
+    wfd.write(buf.encode('utf-8') if isinstance(buf, str) else buf)
 
     logger.info("saving first block")
     wfd.seek(len(buf)-opts.blocksize, 0)
@@ -210,13 +214,16 @@ if opts.unzip_pad:
     wfd.close()
 
     # adjust buf to include magic
-    buf = buf[:-opts.blocksize] + magic
+    # magic is binary data (ZIP), so we need to work with bytes
+    # Keep buf as string for later operations, but note that the last block is binary
+    # This is OK because we only use buf for finding text markers before this point
+    # and for computing checksums (which we'll handle separately)
 
 else:
 
-    wfd = open(shar, "w")
-    wfd.write(buf)
-    rfd = open(zipFile, "r")
+    wfd = open(shar, "wb")
+    wfd.write(buf.encode('utf-8') if isinstance(buf, str) else buf)
+    rfd = open(zipFile, "rb")
     shutil.copyfileobj(rfd, wfd)
     rfd.close()
     wfd.close()
@@ -226,26 +233,49 @@ else:
     subprocess.check_call(cmd)
 
 # compute the actual checksum
+# The verification script uses sed to delete lines matching ^SFX_CHECKSUM=
+# which removes from the start of the line to the newline (inclusive)
+# We need to read the actual file and compute the checksum
 ckf = hashlib.md5()
-ckf.update(buf[:ckStart])
-ckf.update(buf[ckEnd+1:])
 
-rfd = open(shar, "r")
-rfd.seek(len(buf), 0)
+# Read the entire header from the file (not from memory buffer)
+rfd = open(shar, "rb")
+header_data = rfd.read(len(buf.encode('utf-8') if isinstance(buf, str) else buf))
+rfd.close()
+
+# Find the SFX_CHECKSUM line in the actual file data
+ckStart_file = header_data.find(b"SFX_CHECKSUM=")
+ckEnd_file = header_data.find(b"\n", ckStart_file+1)
+
+# Find the start of the line containing SFX_CHECKSUM=
+line_start = header_data.rfind(b'\n', 0, ckStart_file)
+if line_start == -1:  # No newline found, it's the first line
+    line_start = 0
+else:
+    line_start += 1  # Skip the newline character itself
+
+# Hash everything except the SFX_CHECKSUM line
+ckf.update(header_data[:line_start])
+ckf.update(header_data[ckEnd_file+1:])
+
+# Hash the payload (everything after the header)
+rfd = open(shar, "rb")
+rfd.seek(len(header_data), 0)
 while True:
-    buf = rfd.read(10*1024)
-    if not buf: break
-    ckf.update(buf)
+    chunk = rfd.read(10*1024)
+    if not chunk: break
+    ckf.update(chunk)
 rfd.close()
 
 logger.info("adjusting checksum")
-wfd = open(shar, "r+")
-wfd.seek(ckStart, 0)
-wfd.write("SFX_CHECKSUM=%s #" % ckf.hexdigest())
+wfd = open(shar, "rb+")
+wfd.seek(ckStart_file, 0)
+checksum_line = ("SFX_CHECKSUM=%s #" % ckf.hexdigest()).encode('utf-8')
+wfd.write(checksum_line)
 wfd.close()
 
 logger.info("+ /bin/chmod +x %s", shar)
-os.chmod(shar, 0755)
+os.chmod(shar, 0o755)
 
 logger.debug("+ /bin/rm %s", zipFile)
 os.unlink(zipFile)

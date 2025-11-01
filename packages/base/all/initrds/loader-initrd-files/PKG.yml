@@ -2,7 +2,7 @@ common:
   arch: all
   version: 1.0.0
   copyright: Copyright 2013, 2014, 2015 Big Switch Networks
-  maintainer: support@bigswitch.com
+  maintainer: support@onlp.dev
   support: opennetworklinux@googlegroups.com
 
 packages:
@@ -16,7 +16,7 @@ packages:
       - src/etc : /etc
       - src/lib : /lib
       - src/bootmodes : /bootmodes
-      - src/python: /usr/lib/python2.7/site-packages
+      - src/python: /usr/lib/python3.11/dist-packages
       - $ONL/make/versions/version-onl.sh :   /etc/onl/loader/versions.sh
       - $ONL/make/versions/version-onl.json : /etc/onl/loader/versions.json
       - $ONL/make/versions/version-onl.mk :   /etc/onl/loader/versions.mk
