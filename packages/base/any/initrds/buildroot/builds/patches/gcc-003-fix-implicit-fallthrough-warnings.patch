@@ -21,7 +21,7 @@ Signed-off-by: Claude Code <noreply@anthropic.com>
                   case 1:
                     error ("the last argument must be an 8-bit immediate");
                     break;
-@@ -29799,6 +29800,7 @@ ix86_expand_builtin (tree exp, rtx target, rtx subtarget ATTRIBUTE_UNUSED,
+@@ -29798,6 +29799,7 @@ ix86_expand_builtin (tree exp, rtx target, rtx subtarget ATTRIBUTE_UNUSED,
           if (!TARGET_SSE2)
             /* Emit a normal call if SSE2 isn't available.  */
             return expand_call (exp, target, ignore);
@@ -29,7 +29,7 @@ Signed-off-by: Claude Code <noreply@anthropic.com>
         default:
           return ix86_expand_args_builtin (d, exp, target);
         }
-@@ -38613,7 +38615,7 @@ ix86_preferred_simd_mode (enum machine_mode mode)
+@@ -38611,7 +38612,7 @@ ix86_preferred_simd_mode (enum machine_mode mode)
         return V4DFmode;
       else if (TARGET_SSE2)
         return V2DFmode;
@@ -37,4 +37,5 @@ Signed-off-by: Claude Code <noreply@anthropic.com>
 +      /* fall through */
 
     default:
-      break;
+      return word_mode;
+
