@@ -1,0 +1,40 @@
+Fix implicit fallthrough warnings in GCC 4.7.2 i386.c
+
+Add explicit fall-through comments to fix -Wimplicit-fallthrough warnings
+when building GCC 4.7.2 with newer compiler versions. Modern GCC requires
+explicit fall-through annotations in switch statements.
+
+This fixes warnings:
+i386.c:29798:14: warning: this statement may fall through [-Wimplicit-fallthrough=]
+i386.c:28882:24: warning: this statement may fall through [-Wimplicit-fallthrough=]
+i386.c:38612:15: warning: this statement may fall through [-Wimplicit-fallthrough=]
+
+Signed-off-by: Claude Code <noreply@anthropic.com>
+
+--- a/gcc/config/i386/i386.c
++++ b/gcc/config/i386/i386.c
+@@ -28884,6 +28884,7 @@
+ 			error ("the next to last argument must be an 8-bit immediate");
+ 			break;
+ 		      }
++		  /* fall through */
+ 		  case 1:
+ 		    error ("the last argument must be an 8-bit immediate");
+ 		    break;
+@@ -29798,6 +29799,7 @@
+ 	  if (!TARGET_SSE2)
+ 	    /* Emit a normal call if SSE2 isn't available.  */
+ 	    return expand_call (exp, target, ignore);
++	/* fall through */
+ 	default:
+ 	  return ix86_expand_args_builtin (d, exp, target);
+ 	}
+@@ -38611,7 +38613,7 @@
+ 	return V4DFmode;
+       else if (TARGET_SSE2)
+ 	return V2DFmode;
+-      /* FALLTHRU */
++      /* fall through */
+
+     default:
+       return word_mode;
