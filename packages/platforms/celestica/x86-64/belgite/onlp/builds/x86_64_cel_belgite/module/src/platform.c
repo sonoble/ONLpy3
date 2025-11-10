@@ -58,8 +58,8 @@ static inline __s32 i2c_smbus_read_block_data(int file, __u8 command, __u8 *valu
     return data.block[0];
 }
 
-char command[256];
-FILE *fp;
+static char command[256];
+static FILE *fp;
 
 static struct device_info fan_information[FAN_COUNT + 1] = {
     {"unknown", "unknown",1}, //check
