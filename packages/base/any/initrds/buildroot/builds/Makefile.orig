@@ -38,7 +38,6 @@ setup: setup-pyroute2 setup-dnspython setup-libyaml setup-pyyaml setup-jq setup-
 	cd $(BUILDROOT_SOURCE) && patch -p1 < ../patches/buildroot-001-fix-find-perm-deprecated-syntax.patch
 	cd $(BUILDROOT_SOURCE) && patch -p1 < ../patches/gcc-001-disable-texinfo-documentation-build.patch
 	cd $(BUILDROOT_SOURCE) && patch -p1 < ../patches/gcc-002-fix-function-pedantic-warning.patch
-	cd $(BUILDROOT_SOURCE) && patch -p1 < ../patches/gcc-003-fix-implicit-fallthrough-warnings.patch
 	sed -i 's%^DOSFSTOOLS_SITE =.*%DOSFSTOOLS_SITE = http://downloads.openwrt.org/sources%' $(BUILDROOT_SOURCE)/package/dosfstools/dosfstools.mk
 	sed -i 's%^UEMACS_SITE =.*%UEMACS_SITE = http://www.kernel.org/pub/linux/kernel/uemacs%;s%^UEMACS_SOURCE =.*%UEMACS_SOURCE = em-$$(UEMACS_VERSION).tar.gz%' $(BUILDROOT_SOURCE)/package/uemacs/uemacs.mk
 	mkdir -p $(BUILDROOT_ARCHDIRS)

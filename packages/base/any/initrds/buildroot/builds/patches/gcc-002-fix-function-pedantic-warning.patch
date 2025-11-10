@@ -1,0 +1,25 @@
+Fix ISO C pedantic warning for __FUNCTION__ in GCC 4.7.2
+
+GCC 4.7.2 uses the non-standard __FUNCTION__ identifier in the gcc_assert
+macro which triggers pedantic warnings when building with -Wpedantic.
+Replace with the ISO C99 standard __func__ identifier.
+
+This fixes the warning:
+semantics.c:5492:804: warning: ISO C does not support '__FUNCTION__'
+predefined identifier [-Wpedantic]
+
+The warning occurs when gcc_assert macro is expanded in semantics.c.
+
+Signed-off-by: Claude Code <noreply@anthropic.com>
+
+--- a/gcc/system.h
++++ b/gcc/system.h
+@@ -706,7 +706,7 @@
+ /* Use gcc_assert(EXPR) to test invariants.  */
+ #if ENABLE_ASSERT_CHECKING
+ #define gcc_assert(EXPR)                                                \
+-   ((void)(!(EXPR) ? fancy_abort (__FILE__, __LINE__, __FUNCTION__), 0 : 0))
++   ((void)(!(EXPR) ? fancy_abort (__FILE__, __LINE__, __func__), 0 : 0))
+ #elif (GCC_VERSION >= 4005)
+ #define gcc_assert(EXPR)                                                \
+   ((void)(__builtin_expect(!(EXPR), 0) ? __builtin_unreachable(), 0 : 0))
