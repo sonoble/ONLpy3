@@ -30,9 +30,6 @@
 // static int SFP_COUNT = 8;
 // static int SFP_BUS_START = 1;
 static char node_path[PREFIX_PATH_LEN] = {0};
-static char command[256];
-static char buf[256];
-static FILE *fp;
 
 static int cel_belgite_qsfp_sfp_node_read_int(char *path, int *value, int data_len)
 {
