@@ -168,7 +168,17 @@ fi
 
 if test "$mode_install"; then
   echo "extracting rootfs $workdir/rootfs.sqsh --> $destdir"
-  unsquashfs -f -d "$destdir" "$workdir/rootfs.sqsh"
+  # Mount and copy instead of unsquashfs to avoid threading deadlock
+  sqsh_mount=$(mktemp -d)
+  mount -t squashfs -o loop,ro "$workdir/rootfs.sqsh" "$sqsh_mount"
+  if test $? -ne 0; then
+    echo "*** failed to mount squashfs" 1>&2
+    rmdir "$sqsh_mount"
+    exit 1
+  fi
+  cp -a "$sqsh_mount"/* "$sqsh_mount"/.??* "$destdir/" 2>/dev/null || cp -a "$sqsh_mount"/* "$destdir/"
+  umount "$sqsh_mount"
+  rmdir "$sqsh_mount"
   if test ! -f "$destdir/lib/vendor-config/onl/install/lib.sh"; then
     echo "*** invalid squashfs contents" 1>&2
     exit 1
