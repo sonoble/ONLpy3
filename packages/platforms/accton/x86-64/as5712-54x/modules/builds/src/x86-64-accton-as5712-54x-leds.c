@@ -543,7 +543,7 @@ static struct platform_driver accton_as5712_54x_led_driver = {
     },
 };
 
-static int __init accton_as5712_54x_led_init(void)
+int accton_as5712_54x_leds_init(void)
 {
     int ret;
 
@@ -573,15 +573,15 @@ exit:
     return ret;
 }
 
-static void __exit accton_as5712_54x_led_exit(void)
+void accton_as5712_54x_leds_exit(void)
 {
     platform_device_unregister(ledctl->pdev);
     platform_driver_unregister(&accton_as5712_54x_led_driver);
     kfree(ledctl);
 }
 
-/* module_init(accton_as5712_54x_led_init); - now called from cpld init */
-/* module_exit(accton_as5712_54x_led_exit); - now called from cpld exit */
+module_init(accton_as5712_54x_leds_init);
+module_exit(accton_as5712_54x_leds_exit);
 
 MODULE_AUTHOR("Brandon Chuang <brandon_chuang@accton.com.tw>");
 MODULE_DESCRIPTION("accton_as5712_54x_led driver");

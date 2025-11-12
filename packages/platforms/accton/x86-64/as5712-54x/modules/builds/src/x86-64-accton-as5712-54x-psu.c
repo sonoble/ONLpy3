@@ -159,6 +159,11 @@ static const struct attribute_group as5712_54x_psu_group = {
     .attrs = as5712_54x_psu_attributes,
 };
 
+static const struct attribute_group *as5712_54x_psu_groups[] = {
+    &as5712_54x_psu_group,
+    NULL
+};
+
 static int as5712_54x_psu_probe(struct i2c_client *client,
             const struct i2c_device_id *dev_id)
 {
@@ -183,17 +188,12 @@ static int as5712_54x_psu_probe(struct i2c_client *client,
 
     dev_info(&client->dev, "chip found\n");
 
-    /* Register sysfs hooks */
-    status = sysfs_create_group(&client->dev.kobj, &as5712_54x_psu_group);
-    if (status) {
-        goto exit_free;
-    }
-
-    data->hwmon_dev = hwmon_device_register_with_info(&client->dev, "as5712_54x_psu",
-                                                      NULL, NULL, NULL);
+    /* Register hwmon device with attribute groups */
+    data->hwmon_dev = hwmon_device_register_with_groups(&client->dev, "as5712_54x_psu",
+                                                         NULL, as5712_54x_psu_groups);
     if (IS_ERR(data->hwmon_dev)) {
         status = PTR_ERR(data->hwmon_dev);
-        goto exit_remove;
+        goto exit_free;
     }
 
     dev_info(&client->dev, "%s: psu '%s'\n",
@@ -201,8 +201,6 @@ static int as5712_54x_psu_probe(struct i2c_client *client,
 
     return 0;
 
-exit_remove:
-    sysfs_remove_group(&client->dev.kobj, &as5712_54x_psu_group);
 exit_free:
     kfree(data);
 exit:
@@ -210,15 +208,12 @@ exit:
     return status;
 }
 
-static int as5712_54x_psu_remove(struct i2c_client *client)
+static void as5712_54x_psu_remove(struct i2c_client *client)
 {
     struct as5712_54x_psu_data *data = i2c_get_clientdata(client);
 
     hwmon_device_unregister(data->hwmon_dev);
-    sysfs_remove_group(&client->dev.kobj, &as5712_54x_psu_group);
     kfree(data);
-
-    return 0;
 }
 
 enum psu_index 
@@ -366,9 +361,10 @@ exit:
     return data;
 }
 
-/* module_i2c_driver(as5712_54x_psu_driver); - now called from cpld init */
+module_i2c_driver(as5712_54x_psu_driver);
 
 MODULE_AUTHOR("Brandon Chuang <brandon_chuang@accton.com.tw>");
 MODULE_DESCRIPTION("accton as5712_54x_psu driver");
+MODULE_VERSION("2.0.0-kernel6.1");
 MODULE_LICENSE("GPL");
 

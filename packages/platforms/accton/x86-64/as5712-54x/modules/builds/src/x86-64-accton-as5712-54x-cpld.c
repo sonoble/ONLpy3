@@ -1126,7 +1126,7 @@ add_mux_failed:
 	return ret;
 }
 
-static int as5712_54x_cpld_mux_remove(struct i2c_client *client)
+static void as5712_54x_cpld_mux_remove(struct i2c_client *client)
 {
     struct i2c_mux_core *muxc = i2c_get_clientdata(client);
     struct as5712_54x_cpld_data *data = i2c_mux_priv(muxc);
@@ -1154,8 +1154,6 @@ static int as5712_54x_cpld_mux_remove(struct i2c_client *client)
     }
 
 	i2c_mux_del_adapters(muxc);
-
-    return 0;
 }
 
 static int as5712_54x_cpld_read_internal(struct i2c_client *client, u8 reg)
@@ -1250,13 +1248,13 @@ static struct i2c_driver as5712_54x_cpld_mux_driver = {
 	.id_table	= as5712_54x_cpld_mux_id,
 };
 
-static int __init as5712_54x_cpld_mux_init(void)
+static int __init as5712_54x_cpld_init(void)
 {
     mutex_init(&list_lock);
     return i2c_add_driver(&as5712_54x_cpld_mux_driver);
 }
 
-static void __exit as5712_54x_cpld_mux_exit(void)
+static void __exit as5712_54x_cpld_exit(void)
 {
     i2c_del_driver(&as5712_54x_cpld_mux_driver);
 }
@@ -1265,71 +1263,5 @@ MODULE_AUTHOR("Brandon Chuang <brandon_chuang@accton.com.tw>");
 MODULE_DESCRIPTION("Accton as5712-54x CPLD driver");
 MODULE_LICENSE("GPL");
 
-module_init(as5712_54x_cpld_mux_init);
-module_exit(as5712_54x_cpld_mux_exit);
-
-MODULE_LICENSE("GPL");
-
-/* Forward declarations for fan and leds modules */
-extern int accton_as5712_54x_fan_init(void);
-extern void accton_as5712_54x_fan_exit(void);
-extern int accton_as5712_54x_leds_init(void);
-extern void accton_as5712_54x_leds_exit(void);
-
-/* Forward declaration for psu driver struct */
-extern struct i2c_driver as5712_54x_psu_driver;
-
-/* Wrapper init to call cpld, fan, leds, and psu init */
-static int __init as5712_combined_init(void)
-{
-    int ret;
-    
-    /* Init CPLD first */
-    mutex_init(&list_lock);
-    ret = i2c_add_driver(&as5712_54x_cpld_mux_driver);
-    if (ret < 0)
-        return ret;
-    
-    /* Then init fan */
-    ret = accton_as5712_54x_fan_init();
-    if (ret < 0) {
-        i2c_del_driver(&as5712_54x_cpld_mux_driver);
-        return ret;
-    }
-    
-    /* Then init leds */
-    ret = accton_as5712_54x_leds_init();
-    if (ret < 0) {
-        accton_as5712_54x_fan_exit();
-        i2c_del_driver(&as5712_54x_cpld_mux_driver);
-        return ret;
-    }
-    
-    /* Finally init psu */
-    ret = i2c_add_driver(&as5712_54x_psu_driver);
-    if (ret < 0) {
-        accton_as5712_54x_leds_exit();
-        accton_as5712_54x_fan_exit();
-        i2c_del_driver(&as5712_54x_cpld_mux_driver);
-        return ret;
-    }
-    
-    return 0;
-}
-
-static void __exit as5712_combined_exit(void)
-{
-    /* Exit in reverse order */
-    i2c_del_driver(&as5712_54x_psu_driver);
-    accton_as5712_54x_leds_exit();
-    accton_as5712_54x_fan_exit();
-    i2c_del_driver(&as5712_54x_cpld_mux_driver);
-}
-
-/* Use the combined init/exit instead */
-#undef module_init
-#undef module_exit
-#define module_init(x)
-#define module_exit(x)
-module_init(as5712_combined_init);
-module_exit(as5712_combined_exit);
+module_init(as5712_54x_cpld_init);
+module_exit(as5712_54x_cpld_exit);

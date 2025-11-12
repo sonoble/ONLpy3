@@ -1,7 +1,10 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 """Run the upgrade image
 """
+
+import sys
+sys.path.insert(0, '/usr/lib/python2.7/dist-packages')
 
 import onl.install.ShellApp
 onl.install.ShellApp.Upgrader.main()

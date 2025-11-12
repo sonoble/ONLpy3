@@ -461,6 +461,12 @@ with open(sys.argv[2], 'w') as f:
         finally:
             os.unlink(fix_script_file.name)
 
+        # Ensure tmp directory exists and is writable
+        tmp_dir = os.path.join(dir_, "tmp")
+        if not os.path.exists(tmp_dir):
+            onlu.execute("sudo mkdir -p %s" % tmp_dir)
+        onlu.execute("sudo chown %d:%d %s" % (os.getuid(), os.getgid(), tmp_dir))
+
         script = os.path.join(dir_, "tmp/configure.sh")
         with open(script, "w") as f:
             os.chmod(script, 0o700)

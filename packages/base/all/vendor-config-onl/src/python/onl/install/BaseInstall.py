@@ -383,7 +383,8 @@ class Base:
             with open(dst) as fd:
                 buf = fd.read()
 
-        ecf = buf.encode('base64', 'strict').strip()
+        import base64
+        ecf = base64.b64encode(buf.encode('utf-8')).decode('ascii').strip()
         if self.im.grub and self.im.grubEnv is not None:
             setattr(self.im.grubEnv, 'boot_config_default', ecf)
         if self.im.uboot and self.im.ubootEnv is not None:
@@ -1033,7 +1034,8 @@ class UBIfsCreater(SubprocessMixin, Base):
         self.installerCopy(basename, dst, True)
         with open(dst) as fd:
             buf = fd.read()
-        ecf = buf.encode('base64', 'strict').strip()
+        import base64
+        ecf = base64.b64encode(buf.encode('utf-8')).decode('ascii').strip()
         if self.im.grub and self.im.grubEnv is not None:
             setattr(self.im.grubEnv, 'boot_config_default', ecf)
         if self.im.uboot and self.im.ubootEnv is not None:

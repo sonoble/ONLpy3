@@ -35,17 +35,17 @@
 #define CHASSIS_THERMAL_COUNT 4 
 #define CHASSIS_LED_COUNT     10 
 
-#define PSU1_AC_PMBUS_PREFIX            "/sys/bus/i2c/devices/57-003c/"	/* Compuware psu */
-#define PSU2_AC_PMBUS_PREFIX            "/sys/bus/i2c/devices/58-003f/" /* Compuware psu */
-#define PSU1_AC_3YPOWER_PMBUS_PREFIX    "/sys/bus/i2c/devices/57-0058/" /* 3YPower psu */
-#define PSU2_AC_3YPOWER_PMBUS_PREFIX    "/sys/bus/i2c/devices/58-005b/" /* 3YPower psu */
+#define PSU1_AC_PMBUS_PREFIX            "/sys/bus/i2c/devices/56-003c/"	/* Compuware psu */
+#define PSU2_AC_PMBUS_PREFIX            "/sys/bus/i2c/devices/57-003f/" /* Compuware psu */
+#define PSU1_AC_3YPOWER_PMBUS_PREFIX    "/sys/bus/i2c/devices/56-0058/" /* 3YPower psu */
+#define PSU2_AC_3YPOWER_PMBUS_PREFIX    "/sys/bus/i2c/devices/57-005b/" /* 3YPower psu */
 
-#define PSU1_AC_EEPROM_PREFIX "/sys/bus/i2c/devices/57-0038/"
-#define PSU1_DC_EEPROM_PREFIX "/sys/bus/i2c/devices/57-0050/"
-#define PSU2_AC_EEPROM_PREFIX "/sys/bus/i2c/devices/58-003b/"
-#define PSU2_DC_EEPROM_PREFIX "/sys/bus/i2c/devices/58-0053/"
-#define PSU1_AC_3YPOWER_EEPROM_PREFIX "/sys/bus/i2c/devices/57-0050/"
-#define PSU2_AC_3YPOWER_EEPROM_PREFIX "/sys/bus/i2c/devices/58-0053/"
+#define PSU1_AC_EEPROM_PREFIX "/sys/bus/i2c/devices/56-0038/"
+#define PSU1_DC_EEPROM_PREFIX "/sys/bus/i2c/devices/56-0050/"
+#define PSU2_AC_EEPROM_PREFIX "/sys/bus/i2c/devices/57-003b/"
+#define PSU2_DC_EEPROM_PREFIX "/sys/bus/i2c/devices/57-0053/"
+#define PSU1_AC_3YPOWER_EEPROM_PREFIX "/sys/bus/i2c/devices/56-0050/"
+#define PSU2_AC_3YPOWER_EEPROM_PREFIX "/sys/bus/i2c/devices/57-0053/"
 
 #define PSU1_AC_EEPROM_NODE(node) PSU1_AC_EEPROM_PREFIX#node
 #define PSU1_DC_EEPROM_NODE(node) PSU1_DC_EEPROM_PREFIX#node
@@ -54,7 +54,7 @@
 #define PSU1_AC_3YPOWER_EEPROM_NODE(node) PSU1_AC_3YPOWER_EEPROM_PREFIX#node
 #define PSU2_AC_3YPOWER_EEPROM_NODE(node) PSU2_AC_3YPOWER_EEPROM_PREFIX#node
 
-#define IDPROM_PATH "/sys/devices/pci0000:00/0000:00:13.0/i2c-1/1-0057/eeprom"
+#define IDPROM_PATH "/sys/devices/pci0000:00/0000:00:13.0/i2c-55/55-0057/eeprom"
 
 int deviceNodeWriteInt(char *filename, int value, int data_len);
 int deviceNodeReadBinary(char *filename, char *buffer, int buf_size, int data_len);

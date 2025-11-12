@@ -260,6 +260,11 @@ static const struct attribute_group accton_as5712_54x_fan_group = {
     .attrs = accton_as5712_54x_fan_attributes,
 };
 
+static const struct attribute_group *accton_as5712_54x_fan_groups[] = {
+    &accton_as5712_54x_fan_group,
+    NULL
+};
+
 static int accton_as5712_54x_fan_read_value(u8 reg)
 {
     return as5712_54x_cpld_read(0x60, reg);
@@ -347,34 +352,22 @@ static int accton_as5712_54x_fan_probe(struct platform_device *pdev)
 {
     int status = -1;
 
-    /* Register sysfs hooks */
-    status = sysfs_create_group(&pdev->dev.kobj, &accton_as5712_54x_fan_group);
-    if (status) {
-        goto exit;
-
-    }
-
-    fan_data->hwmon_dev = hwmon_device_register_with_info(&pdev->dev, "as5712_54x_fan",
-                                                      NULL, NULL, NULL);
+    /* Register hwmon device with attribute groups */
+    fan_data->hwmon_dev = hwmon_device_register_with_groups(&pdev->dev, "as5712_54x_fan",
+                                                             NULL, accton_as5712_54x_fan_groups);
 	if (IS_ERR(fan_data->hwmon_dev)) {
 		status = PTR_ERR(fan_data->hwmon_dev);
-		goto exit_remove;
+		return status;
 	}
 
     dev_info(&pdev->dev, "accton_as5712_54x_fan\n");
 
     return 0;
-
-exit_remove:
-    sysfs_remove_group(&pdev->dev.kobj, &accton_as5712_54x_fan_group);
-exit:
-    return status;
 }
 
 static int accton_as5712_54x_fan_remove(struct platform_device *pdev)
 {
     hwmon_device_unregister(fan_data->hwmon_dev);
-    sysfs_remove_group(&fan_data->pdev->dev.kobj, &accton_as5712_54x_fan_group);
 
     return 0;
 }
@@ -390,7 +383,7 @@ static struct platform_driver accton_as5712_54x_fan_driver = {
     },
 };
 
-static int __init accton_as5712_54x_fan_init(void)
+int accton_as5712_54x_fan_init(void)
 {
     int ret;
 
@@ -421,7 +414,7 @@ exit:
     return ret;
 }
 
-static void __exit accton_as5712_54x_fan_exit(void)
+void accton_as5712_54x_fan_exit(void)
 {
     platform_device_unregister(fan_data->pdev);
     platform_driver_unregister(&accton_as5712_54x_fan_driver);
@@ -430,8 +423,8 @@ static void __exit accton_as5712_54x_fan_exit(void)
 
 MODULE_AUTHOR("Brandon Chuang <brandon_chuang@accton.com.tw>");
 MODULE_DESCRIPTION("accton_as5712_54x_fan driver");
+MODULE_VERSION("2.0.0-kernel6.1");
 MODULE_LICENSE("GPL");
 
-/* module_init(accton_as5712_54x_fan_init); - now called from cpld init */
-/* module_exit(accton_as5712_54x_fan_exit); - now called from cpld exit */
-MODULE_LICENSE("GPL");
+module_init(accton_as5712_54x_fan_init);
+module_exit(accton_as5712_54x_fan_exit);

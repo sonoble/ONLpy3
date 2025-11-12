@@ -26,6 +26,8 @@ $(TARGET):
 	$(ONLPM) --sudo $(foreach p,$(PLATFORM_PACKAGES),--extract-dir $(p) $(ROOT))
 	$(MAKE) __vendor_config_data
 	$(ONLPM) --sudo --force --extract-dir onl-vendor-config-onl:all $(ROOT)
+	sudo mkdir -p $(ROOT)/usr/lib/python2.7/dist-packages
+	sudo cp -a $(ROOT)/usr/lib/python3.11/dist-packages/* $(ROOT)/usr/lib/python2.7/dist-packages/ 2>/dev/null || true
 	$(ONL)/tools/sjson.py --kj version $(ONL)/make/versions/version-onl.json --kl platforms $(PLATFORMS) --kv arch $(ARCH) --out manifest.json
 	sudo mkdir -p $(ROOT)/etc/onl/loader && sudo cp manifest.json $(ROOT)/etc/onl/loader
 	sudo $(ONL)/tools/makedevs -d $(ROOT)/etc/rootperms $(abspath $(ROOT))
