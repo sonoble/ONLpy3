@@ -21,6 +21,29 @@ class OnlPlatform_x86_64_accton_as5712_54x_r0(OnlPlatformAccton,
         # is available when platform devices are initialized
         os.system("modprobe i2c-ismt")
 
+        # Bind ismt_smbus driver to PCI device to create I2C adapter
+        os.system("echo 0000:00:13.0 > /sys/bus/pci/drivers/ismt_smbus/bind 2>/dev/null || true")
+
+        # Find which bus is iSMT (Debian 9: bus 55, Debian 12: bus 1)
+        import time
+        import glob
+        ismt_bus = None
+        for attempt in range(50):  # Wait up to 5 seconds
+            for name_file in glob.glob('/sys/bus/i2c/devices/i2c-*/name'):
+                try:
+                    with open(name_file) as f:
+                        if 'iSMT' in f.read():
+                            ismt_bus = int(name_file.split('/')[-2].split('-')[1])
+                            break
+                except:
+                    pass
+            if ismt_bus is not None:
+                break
+            time.sleep(0.1)
+
+        if ismt_bus is None:
+            raise RuntimeError("iSMT I2C adapter not found after modprobe and bind")
+
         # Load modules, ignoring errors if already loaded
         try:
             self.insmod('optoe')
@@ -76,28 +99,28 @@ class OnlPlatform_x86_64_accton_as5712_54x_r0(OnlPlatformAccton,
 
         self.new_i2c_devices(
             [
-                # initiate multiplexer (PCA9548) on iSMT bus 55
-                ('pca9548', 0x70, 55),
+                # initiate multiplexer (PCA9548) on iSMT bus (Debian 9: 55, Debian 12: 1)
+                ('pca9548', 0x70, ismt_bus),
 
-                # initiate PSU-1 AC Power (on pca9548 mux channels 56-63)
-                ('as5712_54x_psu1', 0x38, 56),
-                ('cpr_4011_4mxx',  0x3c, 56),
-                ('as5712_54x_psu1', 0x50, 56),
-                ('ym2401',  0x58, 56),
+                # initiate PSU-1 AC Power (on pca9548 mux channels)
+                ('as5712_54x_psu1', 0x38, ismt_bus+1),
+                ('cpr_4011_4mxx',  0x3c, ismt_bus+1),
+                ('as5712_54x_psu1', 0x50, ismt_bus+1),
+                ('ym2401',  0x58, ismt_bus+1),
 
-                # initiate PSU-2 AC Power (on pca9548 mux channels 56-63)
-                ('as5712_54x_psu2', 0x3b, 57),
-                ('cpr_4011_4mxx',  0x3f, 57),
-                ('as5712_54x_psu2', 0x53, 57),
-                ('ym2401',  0x5b, 57),
+                # initiate PSU-2 AC Power (on pca9548 mux channels)
+                ('as5712_54x_psu2', 0x3b, ismt_bus+2),
+                ('cpr_4011_4mxx',  0x3f, ismt_bus+2),
+                ('as5712_54x_psu2', 0x53, ismt_bus+2),
+                ('ym2401',  0x5b, ismt_bus+2),
 
-                # initiate lm75 (on pca9548 mux channels 56-63)
-                ('lm75', 0x48, 60),
-                ('lm75', 0x49, 61),
-                ('lm75', 0x4a, 62),
+                # initiate lm75 (on pca9548 mux channels)
+                ('lm75', 0x48, ismt_bus+5),
+                ('lm75', 0x49, ismt_bus+6),
+                ('lm75', 0x4a, ismt_bus+7),
 
-                # System EEPROM on iSMT bus 55
-                ('24c02', 0x57, 55),
+                # System EEPROM on iSMT bus
+                ('24c02', 0x57, ismt_bus),
                 ]
             )
 

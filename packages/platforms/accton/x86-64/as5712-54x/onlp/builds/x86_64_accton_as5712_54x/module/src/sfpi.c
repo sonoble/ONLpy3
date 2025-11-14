@@ -29,7 +29,7 @@
 #include "x86_64_accton_as5712_54x_int.h"
 #include "x86_64_accton_as5712_54x_log.h"
 
-#define CPLD_MUX_BUS_START_INDEX 1  /* Kernel 6.1: CPLD mux creates buses starting at 1, iSMT becomes bus 55 */
+#define CPLD_MUX_BUS_START_INDEX 2  /* Kernel 6.1 with modprobe i2c-ismt: iSMT loads first (bus 1), CPLD mux starts at bus 2 */
 
 #define PORT_EEPROM_FORMAT              "/sys/bus/i2c/devices/%d-0050/eeprom"
 #define MODULE_PRESENT_FORMAT		    "/sys/bus/i2c/devices/0-00%d/module_present_%d"
@@ -95,8 +95,8 @@ static int front_port_bus_index(int port)
             rport = 54;  /* Kernel 6.1 */
             break;
         default:
-            /* SFP ports 0-47 (ONLP): map to buses 1-48 (hardware) */
-            rport = port + 1;
+            /* SFP ports 0-47 (ONLP): map to buses 2-49 (hardware, kernel 6.1 with modprobe i2c-ismt) */
+            rport = port + CPLD_MUX_BUS_START_INDEX;
             break;
     }
 
