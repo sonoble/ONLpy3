@@ -1,9 +1,11 @@
 from onl.platform.base import *
 from onl.platform.accton import *
 
-# Platform Config Version: 2.1.0-kernel6.1
-# Last Modified: 2025-01-08
-# Changes: Fixed ismt_smbus vs i2c-ismt driver conflict, iSMT is bus 1, CPLD mux is buses 2-55, pca9548 mux creates buses 56-63
+# Platform Config Version: 2.2.0-kernel6.1
+# Last Modified: 2025-11-14
+# Changes: Use modprobe for i2c-ismt following PR #1018 pattern to fix timing issue.
+#          Root cause: self.insmod() with try/except silently failed on first boot.
+#          iSMT is bus 55 (confirmed on both Debian 9 and Debian 12 with kernel 6.1).
 
 class OnlPlatform_x86_64_accton_as5712_54x_r0(OnlPlatformAccton,
                                               OnlPlatformPortConfig_48x10_6x40):
@@ -11,9 +13,13 @@ class OnlPlatform_x86_64_accton_as5712_54x_r0(OnlPlatformAccton,
     PLATFORM='x86-64-accton-as5712-54x-r0'
     MODEL="AS5712-54X"
     SYS_OBJECT_ID=".5712.54"
-    CONFIG_VERSION="2.1.0-kernel6.1-20250108"
+    CONFIG_VERSION="2.2.0-kernel6.1-20251114"
 
     def baseconfig(self):
+        # Load i2c-ismt module FIRST using modprobe (following PR #1018 pattern)
+        # This must happen before any other module loading to ensure iSMT adapter
+        # is available when platform devices are initialized
+        os.system("modprobe i2c-ismt")
 
         # Load modules, ignoring errors if already loaded
         try:
@@ -63,24 +69,10 @@ class OnlPlatform_x86_64_accton_as5712_54x_r0(OnlPlatformAccton,
         subprocess.call('echo port54 > /sys/bus/i2c/devices/54-0050/port_name', shell=True)
 
         ########### initialize iSMT I2C bus (bus 55 in kernel 6.1) ###########
-        # Note: In kernel 6.1, CPLD mux channels use buses 2-54,
-        # After loading i2c-ismt and binding driver, iSMT adapter becomes bus 55
-
-        # Load i2c-ismt module (provides ismt_smbus driver)
-        try:
-            self.insmod("i2c-ismt")
-        except:
-            pass
-
-        # Bind ismt_smbus driver to PCI device 0000:00:13.0 to create I2C adapter
-        os.system("echo 0000:00:13.0 > /sys/bus/pci/drivers/ismt_smbus/bind 2>/dev/null || true")
-
-        # Wait for bus 55 to be created
-        import time
-        for i in range(50):  # Wait up to 5 seconds
-            if os.path.exists('/sys/bus/i2c/devices/i2c-55'):
-                break
-            time.sleep(0.1)
+        # Note: iSMT adapter is bus 55 (confirmed on both Debian 9 and 12 with kernel 6.1)
+        # CPLD mux on bus 0 creates channels buses 1-54
+        # pca9548 mux on bus 55 creates channels buses 56-63
+        # i2c-ismt module loaded at start of baseconfig() using modprobe
 
         self.new_i2c_devices(
             [
