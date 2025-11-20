@@ -27,11 +27,17 @@ packages:
       builds/onlp-platform-defaults/$BUILD_DIR/${TOOLCHAIN}/bin/libonlp-platform-defaults.so : $libdir/
       builds/onlpd/$BUILD_DIR/${TOOLCHAIN}/bin/onlpd : $bindir/
       ${ONL}/packages/base/any/onlp/src/onlpdump.py: $bindir/
-      ${ONL}/packages/base/any/onlp/src/onlp/module/python/onlp/__init__.py: ${PY_INSTALL}/onlp/
-      ${ONL}/packages/base/any/onlp/src/onlp/module/python/onlp/onlp: ${PY_INSTALL}/onlp/onlp
-      ${ONL}/packages/base/any/onlp/src/onlp/module/python/onlp/test: ${PY_INSTALL}/onlp/test
-      ${ONL}/packages/base/any/onlp/src/onlplib/module/python/onlp/onlplib: ${PY_INSTALL}/onlp/onlplib
-      ${ONL}/sm/bigcode/modules/sff/module/python/sff: ${PY_INSTALL}/onlp/sff
+      ${ONL}/packages/base/any/onlp/src/onlp/module/python/onlp/__init__.py: /usr/lib/python3.11/dist-packages/onlp/
+      ${ONL}/packages/base/any/onlp/src/onlp/module/python/onlp/onlp: /usr/lib/python3.11/dist-packages/onlp/onlp
+      ${ONL}/packages/base/any/onlp/src/onlp/module/python/onlp/test: /usr/lib/python3.11/dist-packages/onlp/test
+      ${ONL}/packages/base/any/onlp/src/onlplib/module/python/onlp/onlplib: /usr/lib/python3.11/dist-packages/onlp/onlplib
+      ${ONL}/packages/base/any/onlp/src/onlp/module/python/onlp/__init__.py: /usr/lib/python2.7/dist-packages/onlp/
+      ${ONL}/packages/base/any/onlp/src/onlp/module/python/onlp/onlp: /usr/lib/python2.7/dist-packages/onlp/onlp
+      ${ONL}/packages/base/any/onlp/src/onlp/module/python/onlp/test: /usr/lib/python2.7/dist-packages/onlp/test
+      ${ONL}/packages/base/any/onlp/src/onlplib/module/python/onlp/onlplib: /usr/lib/python2.7/dist-packages/onlp/onlplib
+      ${ONL}/packages/base/any/onlp/src/onlp/module/python/onlp/__init__.py: /usr/lib/python2.7/dist-packages/onlp/
+      ${ONL}/sm/bigcode/modules/sff/module/python/sff: /usr/lib/python3.11/dist-packages/onlp/sff
+      ${ONL}/sm/bigcode/modules/sff/module/python/sff: /usr/lib/python2.7/dist-packages/onlp/sff
 
     init: $ONL/packages/base/any/onlp/src/onlpd.init
 

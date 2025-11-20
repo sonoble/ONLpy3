@@ -29,7 +29,7 @@
 #include "x86_64_accton_as5712_54x_int.h"
 #include "x86_64_accton_as5712_54x_log.h"
 
-#define CPLD_MUX_BUS_START_INDEX 2
+#define CPLD_MUX_BUS_START_INDEX 1  /* Kernel 6.1: CPLD mux creates buses starting at 1, iSMT becomes bus 55 */
 
 #define PORT_EEPROM_FORMAT              "/sys/bus/i2c/devices/%d-0050/eeprom"
 #define MODULE_PRESENT_FORMAT		    "/sys/bus/i2c/devices/0-00%d/module_present_%d"
@@ -71,25 +71,35 @@ static int front_port_bus_index(int port)
 {
     int rport = 0;
 
+    /* Kernel 6.1: ONLP uses 0-based port numbers (0-53), hardware uses 1-based bus numbers
+     * SFP ports 0-47 (ONLP) are on buses 1-48 (hardware)
+     * QSFP ports have non-sequential bus mapping per hardware design */
     switch (port)
     {
-        case 49:
-            rport = 54;
+        case 48:  /* ONLP port 48 = front panel port 49 */
+            rport = 49;  /* Kernel 6.1: was 54 in kernel 4.14 */
             break;
-        case 50:
-            rport = 53;
+        case 49:  /* ONLP port 49 = front panel port 50 */
+            rport = 51;  /* Kernel 6.1: was 53 in kernel 4.14 */
             break;
-        case 51:
-            rport = 52;
+        case 50:  /* ONLP port 50 = front panel port 51 */
+            rport = 53;  /* Kernel 6.1: was 52 in kernel 4.14 */
             break;
-        case 52:
-            rport = 51;
+        case 51:  /* ONLP port 51 = front panel port 52 */
+            rport = 50;  /* Kernel 6.1: was 51 in kernel 4.14 */
+            break;
+        case 52:  /* ONLP port 52 = front panel port 53 */
+            rport = 52;  /* Kernel 6.1 */
+            break;
+        case 53:  /* ONLP port 53 = front panel port 54 */
+            rport = 54;  /* Kernel 6.1 */
             break;
         default:
-            rport = port + 2;
+            /* SFP ports 0-47 (ONLP): map to buses 1-48 (hardware) */
+            rport = port + 1;
             break;
     }
-    
+
     return rport;
 }
 

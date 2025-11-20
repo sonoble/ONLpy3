@@ -24,7 +24,6 @@
  *
  ***********************************************************/
 #include <errno.h>
-#include <sys/ioctl.h>
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>

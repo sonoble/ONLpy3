@@ -1,1 +1,36 @@
-!include $ONL_TEMPLATES/platform-config-platform.yml ARCH=amd64 VENDOR=accton BASENAME=x86-64-accton-as5712-54x REVISION=r0
+############################################################
+#
+# Platform Config Package for AS5712-54X r0
+# Custom PKG.yml to include rc.local
+#
+############################################################
+variables:
+  PLATFORM: x86-64-accton-as5712-54x-r0
+
+prerequisites:
+  packages:
+    - "onl-vendor-config-accton:all"
+    - "onl-platform-modules-x86-64-accton-as5712-54x:amd64"
+
+common:
+  version: 1.0.0
+  arch: amd64
+  copyright: Copyright 2013, 2014, 2015 Big Switch Networks
+  maintainer: support@bigswitch.com
+  support: opennetworklinux@googlegroups.com
+  changelog: None
+
+packages:
+  - name: onl-platform-config-${PLATFORM}
+    depends: onl-vendor-config-accton,onl-platform-modules-x86-64-accton-as5712-54x
+    summary: ONL Platform Configuration Package for the ${PLATFORM}
+
+    files:
+      src/lib: /lib/platform-config/${PLATFORM}/onl
+      src/python: ${PY_INSTALL}/onl/platform/
+      src/etc/rc.local: /etc/rc.local
+
+  - name: onl-platform-build-${PLATFORM}
+    summary: ONL Platform Build Package for the ${PLATFORM}
+    optional-files:
+      builds: $$PKG_INSTALL

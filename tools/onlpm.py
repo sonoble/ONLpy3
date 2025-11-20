@@ -306,11 +306,13 @@ class OnlPackage(object):
 
     def _validate_files(self, key, required=True):
         """Validate the existence of the required input files for the current package."""
+        logger.info("DEBUG: Before validation, %s has %d entries: %s" % (key, len(self.pkg.get(key, [])), self.pkg.get(key, [])))
         self.pkg[key] = onlu.validate_src_dst_file_tuples(self.dir,
                                                           self.pkg[key],
                                                           dict(PKG=self.pkg['name'], PKG_INSTALL='/usr/share/onl/packages/%s/%s' % (self.pkg['arch'], self.pkg['name'])),
                                                           OnlPackageError,
                                                           required=required)
+        logger.info("DEBUG: After validation, %s has %d entries" % (key, len(self.pkg[key])))
     def _validate(self):
         """Validate the package contents."""
 
@@ -410,7 +412,10 @@ class OnlPackage(object):
         # The package file will be built into the workdir
         self.pkg['__workdir'] = workdir
 
-        for (src,dst) in self.pkg.get('files', {}):
+        files_list = self.pkg.get('files', {})
+        logger.info("DEBUG: Processing %d file entries" % len(files_list))
+        for (src,dst) in files_list:
+            logger.info("DEBUG: Copying %s -> %s" % (src, dst))
             OnlPackage.copyf(src, dst, root, symlinks=self.pkg.get('symlinks', False))
 
         for (src,dst) in self.pkg.get('optional-files', {}):

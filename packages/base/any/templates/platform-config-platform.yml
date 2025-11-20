@@ -26,8 +26,9 @@ packages:
     summary: ONL Platform Configuration Package for the $PLATFORM
 
     files:
-      src/lib: /lib/platform-config/$PLATFORM/onl
-      src/python : ${PY_INSTALL}/onl/platform/
+      - src/lib: /lib/platform-config/$PLATFORM/onl
+      - src/python: /usr/lib/python3.11/dist-packages/onl/platform/
+      - src/python: /usr/lib/python2.7/dist-packages/onl/platform/
 
   - name: onl-platform-build-$PLATFORM
     summary: ONL Platform Build Package for the $PLATFORM

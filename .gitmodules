@@ -1,21 +1,21 @@
 [submodule "packages/base/any/initrds/buildroot/builds/buildroot-mirror"]
 	path = packages/base/any/initrds/buildroot/builds/buildroot-mirror
-	url = http://github.com/opennetlinux/buildroot-mirror
+	url = http://github.com/sonoble/buildroot-mirror
 [submodule "packages/base/any/kernels/legacy/linux-3.9.6"]
 	path = packages/base/any/kernels/legacy/linux-3.9.6
 	url = http://github.com/opennetlinux/linux-3.9.6
 [submodule "sm/infra"]
 	path = sm/infra
-	url = http://github.com/opennetlinux/infra
+	url = http://github.com/sonoble/infra
 [submodule "sm/bigcode"]
 	path = sm/bigcode
-	url = http://github.com/opennetlinux/bigcode
+	url = http://github.com/sonoble/bigcode
 [submodule "packages/base/any/kernels/legacy/linux-3.8.13"]
 	path = packages/base/any/kernels/legacy/linux-3.8.13
 	url = http://github.com/opennetlinux/linux-3.8.13
 [submodule "packages/platforms-closed"]
 	path = packages/platforms-closed
-	url = git@github.com:opennetlinux/platforms-closed
+	url = git@github.com:sonoble/platforms-closed
 [submodule "sm/build-artifacts"]
 	path = sm/build-artifacts
         url = http://github.com/opennetlinux/build-artifacts

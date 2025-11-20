@@ -102,7 +102,12 @@ def loadf(fname, vard={}):
     # First load: grab the variables dict
     string = open(fname).read()
     try:
-        data = yaml.load(string, Loader=yaml.FullLoader)
+        # Use FullLoader for Python 3, fallback to Loader for Python 2
+        try:
+            data = yaml.load(string, Loader=yaml.FullLoader)
+        except AttributeError:
+            # Python 2 - use the legacy Loader class
+            data = yaml.load(string, Loader=yaml.Loader)
     except Exception as e:
         raise OnlYamlError("%s\n(filename: %s)" % (e, fname))
 
@@ -125,11 +130,16 @@ def loadf(fname, vard={}):
     string = interpolate(string, variables)
 
     try:
-        data = yaml.load(string, Loader=yaml.FullLoader)
+        # Use FullLoader for Python 3, fallback to Loader for Python 2
+        try:
+            data = yaml.load(string, Loader=yaml.FullLoader)
+        except AttributeError:
+            # Python 2 - use the legacy Loader class
+            data = yaml.load(string, Loader=yaml.Loader)
     except OnlYamlError as e:
         raise e
     except Exception as e:
-        raise OnlYamlError("Interpolation produced invalid results:\n%s\n" %  string)
+        raise OnlYamlError("Interpolation produced invalid results:\n%s\nOriginal error: %s" % (string, str(e)))
 
     return data
 
