@@ -1,4 +1,10 @@
 #!/usr/bin/python
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
+# All syntax in this file is compatible with both Python 2.7 and Python 3.x
+
+import sys
+sys.path.insert(0, '/usr/lib/python2.7/dist-packages')
+
 from onl.platform.current import OnlPlatform
-print OnlPlatform()
+print(OnlPlatform())
 

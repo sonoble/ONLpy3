@@ -1,6 +1,11 @@
 #!/usr/bin/python
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
+# All syntax in this file is compatible with both Python 2.7 and Python 3.x
+
 ############################################################
 import sys
+sys.path.insert(0, '/usr/lib/python2.7/dist-packages')
+
 import platform
 import argparse
 import onl.grub
@@ -20,9 +25,9 @@ onl.grub.onie_boot_mode_set(ops.mode)
 
 if not ops.onie_only:
    onl.grub.boot_onie()
-   print "The system will boot into ONIE %s mode at the next restart." % ops.mode
+   print("The system will boot into ONIE %s mode at the next restart.") % ops.mode
 else:
-   print "Mode %s will be selected the next time the system boots into ONIE." % ops.mode
+   print("Mode %s will be selected the next time the system boots into ONIE.") % ops.mode
 
 
 

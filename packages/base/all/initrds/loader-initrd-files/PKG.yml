@@ -1,6 +1,6 @@
 common:
   arch: all
-  version: 1.0.0
+  version: 1.0.1
   copyright: Copyright 2013, 2014, 2015 Big Switch Networks
   maintainer: support@onlp.dev
   support: opennetworklinux@googlegroups.com
@@ -8,7 +8,7 @@ common:
 packages:
   - name: onl-loader-initrd-files
     depends: [ onl-vendor-config-onl ]
-    version: 1.0.0
+    version: 1.0.1
     summary: Open Network Linux System Loader Source Files
 
     files:

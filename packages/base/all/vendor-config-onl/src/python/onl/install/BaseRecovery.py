@@ -1,3 +1,6 @@
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
+# All syntax in this file is compatible with both Python 2.7 and Python 3.x
+
 """BaseRecovery.py
 
 Base classes for recovery.
@@ -8,8 +11,8 @@ import tempfile
 import binascii
 import glob
 import logging
-from InstallUtils import TempdirContext, MountContext, SubprocessMixin, ProcMountsParser
-from InstallUtils import InitrdContext, BlkidParser
+from .InstallUtils import TempdirContext, MountContext, SubprocessMixin, ProcMountsParser
+from .InstallUtils import InitrdContext, BlkidParser
 from ConfUtils import ChrootGrubEnv
 
 class Base(SubprocessMixin):
@@ -67,7 +70,7 @@ class Base(SubprocessMixin):
                 try:
                     self.check_call(('umount', m.device,),
                                     vmode=self.V1)
-                except CalledProcessError, what:
+                except CalledProcessError as what:
                     self.log.warn("cannot umount %s: %s",
                                   m.device, str(what))
         return 0

@@ -1,6 +1,10 @@
 #!/usr/bin/python
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
+# All syntax in this file is compatible with both Python 2.7 and Python 3.x
+
 import os
 import sys
+
 from onl.sysconfig import sysconfig
 import yaml
 
@@ -8,11 +12,11 @@ if len(sys.argv) == 2:
     try:
         data = eval("sysconfig.%s" % sys.argv[1])
         if isinstance(data,(type(None),str,int,float,bool)):
-            print data
+            print(data)
         else:
-            print yaml.dump(data, default_flow_style=False)
-    except AttributeError, e:
-        print "Path %s is not in the config." % sys.argv[1]
+            print(yaml.dump(data, default_flow_style=False))
+    except AttributeError as e:
+        print("Path %s is not in the config." % sys.argv[1])
         sys.exit(1)
 else:
-    print sysconfig['OnlSystemConfig'].dump()
+    print(sysconfig['OnlSystemConfig'].dump())

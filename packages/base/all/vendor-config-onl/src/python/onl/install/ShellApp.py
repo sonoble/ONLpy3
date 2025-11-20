@@ -1,3 +1,6 @@
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
+# All syntax in this file is compatible with both Python 2.7 and Python 3.x
+
 """ShellApp.py
 """
 
@@ -9,11 +12,11 @@ import subprocess
 import argparse
 import string
 import struct
-from InstallUtils import InitrdContext, MountContext
-from InstallUtils import SubprocessMixin
-from InstallUtils import ProcMountsParser, ProcMtdParser
-from InstallUtils import BlkidParser
-from InstallUtils import UbootInitrdContext
+from .InstallUtils import InitrdContext, MountContext
+from .InstallUtils import SubprocessMixin
+from .InstallUtils import ProcMountsParser, ProcMtdParser
+from .InstallUtils import BlkidParser
+from .InstallUtils import UbootInitrdContext
 
 class AppBase(SubprocessMixin, object):
 
@@ -39,7 +42,7 @@ class AppBase(SubprocessMixin, object):
                        '/bin/sh', '-i')
             try:
                 self.check_call(cmd)
-            except subprocess.CalledProcessError, what:
+            except subprocess.CalledProcessError as what:
                 pass
         return 0
 
@@ -67,7 +70,7 @@ class AppBase(SubprocessMixin, object):
 
         try:
             args = ap.parse_args()
-        except SystemExit, what:
+        except SystemExit as what:
             sys.exit(what.code)
 
         if args.verbose:
@@ -248,7 +251,7 @@ class OnieSysinfoApp(SubprocessMixin, object):
             try:
                 self.output = self.check_output(cmd)
                 ret = 0
-            except subprocess.CalledProcessError, what:
+            except subprocess.CalledProcessError as what:
                 self.log.error("failed command: %s", " ".join(what.cmd))
                 for line in (what.output or "").splitlines():
                     self.log.error(">>> %s", line)

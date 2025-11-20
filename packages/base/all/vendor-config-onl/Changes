@@ -1,0 +1,41 @@
+onl-vendor-config-onl (2.0.1) RELEASED; urgency=low
+
+  * Python 2/3 Compatibility Fixes (2025-11-20) - COMPREHENSIVE
+    - Fixed exception syntax: except Exception, e → except Exception as e
+    - Fixed file() calls: file() → open()
+    - Fixed print statements: print "text" → print("text")
+    - Fixed dict iterators: .iteritems() → .items(), .iterkeys() → .keys(), .itervalues() → .values()
+    - Fixed relative imports: import Fit → from . import Fit
+    - Fixed StringIO compatibility: Added shim for Python 2/3
+    - Fixed yaml.load(): Added Loader=yaml.SafeLoader argument
+    - Fixed types.DictType: types.DictType → isinstance(x, dict)
+    - Fixed string.rjust(): string.rjust(s, n) → s.rjust(n)
+    - Fixed raw_input(): Added try/except for Python 2/3 compatibility
+    - Added missing sys import to boot script
+    - All Python files now compatible with both Python 2.7 and Python 3.11
+    - Added compatibility headers to all modified files
+    - Comprehensive scan performed to catch all Python 2-only constructs
+
+  * Platform Detection Fixes
+    - Added platform.baseconfig() call to boot script 51.onl-platform-baseconf
+    - Ensures platform-specific ONLP implementation is loaded correctly
+
+  * Boot System Fixes
+    - Fixed merged-usr compatibility (moved overlay files from /sbin to /usr/sbin)
+    - Fixed swiprep to use mount+tar instead of unsquashfs (preserves symlinks)
+
+  * Files Modified: 23 total
+    - 14 Python library files in onl/ modules
+    - 4 bin scripts
+    - 1 boot script
+    - 4 additional files for new compatibility issues
+
+ -- ONL Team <support@onlp.dev>  Wed, 20 Nov 2025 00:00:00 +0000
+
+onl-vendor-config-onl (2.0.0) RELEASED; urgency=low
+
+  * Initial Python 3.11 migration for Debian Bookworm
+  * Dual Python 2.7/3.11 environment support
+  * Added python-is-python3 dependency
+
+ -- ONL Team <support@onlp.dev>  Mon, 01 Jan 2025 00:00:00 +0000

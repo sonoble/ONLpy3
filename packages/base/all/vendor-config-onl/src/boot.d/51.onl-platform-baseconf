@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
+# All syntax in this file is compatible with both Python 2.7 and Python 3.x
+
 ### BEGIN INIT INFO
 # Provides:        onl-platform-baseconf
 # Required-Start:
@@ -9,9 +12,20 @@
 # Short-Description: Set up ONL Platform
 ### END INIT INFO
 
+import sys
 from onl.platform.baseconfig import baseconfig
+from onl.platform.current import OnlPlatform
 
+# Set up platform symlinks and base config
 baseconfig()
+
+# Run platform-specific initialization
+try:
+    platform = OnlPlatform()
+    platform.baseconfig()
+except Exception as e:
+    # Log error but don't fail boot
+    sys.stderr.write("Warning: Platform-specific initialization failed: %s\n" % str(e))
 
 
 

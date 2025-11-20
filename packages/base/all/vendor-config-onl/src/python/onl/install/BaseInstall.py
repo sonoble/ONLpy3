@@ -3,12 +3,18 @@
 Base classes for installers.
 """
 
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
+# All syntax in this file is compatible with both Python 2.7 and Python 3.x
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
 import os, sys, stat
 import subprocess
 import re
 import tempfile
 import logging
-import StringIO
 import parted
 import yaml
 import zipfile
@@ -16,12 +22,12 @@ import shutil
 import imp
 import fnmatch, glob
 
-from InstallUtils import SubprocessMixin
-from InstallUtils import MountContext, BlkidParser, PartedParser, UbinfoParser
-from InstallUtils import ProcMountsParser
-from InstallUtils import GdiskParser
-from InstallUtils import OnieSubprocess
-from Plugin import Plugin
+from .InstallUtils import SubprocessMixin
+from .InstallUtils import MountContext, BlkidParser, PartedParser, UbinfoParser
+from .InstallUtils import ProcMountsParser
+from .InstallUtils import GdiskParser
+from .InstallUtils import OnieSubprocess
+from .Plugin import Plugin
 
 import onl.install.ConfUtils
 
@@ -1065,7 +1071,7 @@ class UBIfsCreater(SubprocessMixin, Base):
         return 0     
 
 
-class UbootInstaller(SubprocessMixin, UBIfsCreater):
+class UbootInstaller(UBIfsCreater):
 
     class installmeta(Base.installmeta):
 

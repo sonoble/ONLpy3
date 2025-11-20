@@ -3,10 +3,12 @@
 # ONL System Configuration
 #
 ############################################################
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
+# All syntax in this file is compatible with both Python 2.7 and Python 3.x
+
 import os
 import sys
 import yaml
-import types
 import onl.onlyaml
 import onl.util
 import platform as pp
@@ -21,7 +23,7 @@ class DotDict(dict):
         if item is None:
             raise AttributeError("'%s' object has no attribute '%s'" % (type(self), attr))
 
-        if type(item) == types.DictType:
+        if isinstance(item, dict):
             item = DotDict(item)
 
         return item

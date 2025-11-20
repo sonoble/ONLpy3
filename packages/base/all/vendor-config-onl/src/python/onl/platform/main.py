@@ -1,4 +1,7 @@
 #!/usr/bin/python
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
+# All syntax in this file is compatible with both Python 2.7 and Python 3.x
+
 ############################################################
 #
 # Common commandline main implementation for platform
@@ -17,8 +20,8 @@ def main(platform):
     ops = ap.parse_args()
 
     if ops.info:
-        print platform
+        print(platform)
 
     if ops.env:
-        print platform.get_environment()
+        print(platform.get_environment())
 

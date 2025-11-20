@@ -81,9 +81,51 @@ if [ ! -f /etc/onl/abort ]; then
     # Mounts
     onl-mounts -q mount all
 
-    # Initialize U-Boot environment
+    # Initialize U-Boot environment (for non-x86 platforms)
     if [ -s /proc/device-tree/model ]; then
         initubootenv
+        # Extract boot-config-default from U-Boot environment if it exists
+        if [ -f /etc/fw_env.config ]; then
+            FW_PRINTENV="/usr/bin/fw_printenv"
+            [ -f "$FW_PRINTENV" ] || FW_PRINTENV="/usr/sbin/fw_printenv"
+            if [ -f "$FW_PRINTENV" ]; then
+                boot_config_default=$($FW_PRINTENV -n boot-config-default 2>/dev/null)
+                if [ -n "$boot_config_default" ]; then
+                    echo "$boot_config_default" | python -c "import sys, base64; data = sys.stdin.read().strip(); decoded = base64.b64decode(data); sys.stdout.write(decoded.decode('utf-8') if hasattr(decoded, 'decode') else decoded)" > /etc/onl/boot-config-default 2>/dev/null
+                fi
+            fi
+        fi
+    fi
+
+    # Extract boot_config_default from GRUB environment (for x86/amd64 platforms)
+    if [ ! -f /etc/onl/boot-config-default ] && [ -d /sys/firmware/efi ] || [ ! -s /proc/device-tree/model ]; then
+        # Try to find and mount ONIE-BOOT or ONL-BOOT partition
+        for label in ONIE-BOOT ONL-BOOT; do
+            boot_dev=$(blkid -L "$label" 2>/dev/null)
+            if [ -n "$boot_dev" ]; then
+                # Try to read from GRUB environment
+                GRUB_EDITENV="/usr/bin/grub-editenv"
+                [ -f "$GRUB_EDITENV" ] || GRUB_EDITENV="/usr/sbin/grub-editenv"
+                if [ -f "$GRUB_EDITENV" ]; then
+                    # Mount the boot partition temporarily
+                    mkdir -p /tmp/boot-part
+                    if mount -t ext4 "$boot_dev" /tmp/boot-part 2>/dev/null || mount -t ext2 "$boot_dev" /tmp/boot-part 2>/dev/null; then
+                        for grubenv_path in /tmp/boot-part/grub/grubenv /tmp/boot-part/boot/grub/grubenv; do
+                            if [ -f "$grubenv_path" ]; then
+                                boot_config_default=$($GRUB_EDITENV "$grubenv_path" list 2>/dev/null | grep "^boot_config_default=" | cut -d= -f2-)
+                                if [ -n "$boot_config_default" ]; then
+                                    echo "$boot_config_default" | python -c "import sys, base64; data = sys.stdin.read().strip(); decoded = base64.b64decode(data); sys.stdout.write(decoded.decode('utf-8') if hasattr(decoded, 'decode') else decoded)" > /etc/onl/boot-config-default 2>/dev/null
+                                    break
+                                fi
+                            fi
+                        done
+                        umount /tmp/boot-part 2>/dev/null
+                    fi
+                    rmdir /tmp/boot-part 2>/dev/null
+                    [ -f /etc/onl/boot-config-default ] && break
+                fi
+            fi
+        done
     fi
 
     if [ -f /etc/issue ]; then

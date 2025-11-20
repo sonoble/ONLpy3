@@ -1,6 +1,15 @@
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
+# All syntax in this file is compatible with both Python 2.7 and Python 3.x
+
 """InstallUtils.py
 
 """
+
+# Python 2/3 compatibility
+try:
+    basestring
+except NameError:
+    basestring = str
 
 import os, sys
 import stat
@@ -11,7 +20,7 @@ import string
 import shutil
 import re
 
-import Fit, Legacy
+from . import Fit, Legacy
 
 class SubprocessMixin:
 
@@ -249,7 +258,7 @@ class MountContext(SubprocessMixin):
         if dev is None:
             try:
                 dev = self.check_output(('blkid', '-L', self.label,)).strip()
-            except subprocess.CalledProcessError, what:
+            except subprocess.CalledProcessError as what:
                 raise ValueError("cannot find label %s: %s"
                                  % (self.label, str(what),))
 

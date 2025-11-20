@@ -1,3 +1,6 @@
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
+# All syntax in this file is compatible with both Python 2.7 and Python 3.x
+
 """Fit.py
 
 Parse FIT files.
@@ -166,7 +169,7 @@ class Parser:
                 continue
 
             if tag == self.FDT_NOP:
-                print "NOP"
+                print("NOP")
                 continue
 
             if tag == self.FDT_END:
@@ -534,7 +537,7 @@ class App:
 
         try:
             args = ap.parse_args()
-        except SystemExit, what:
+        except SystemExit as what:
             return what.code
 
         if args.quiet:

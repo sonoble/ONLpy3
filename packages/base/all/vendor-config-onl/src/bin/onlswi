@@ -1,6 +1,11 @@
 #!/usr/bin/python
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
+# All syntax in this file is compatible with both Python 2.7 and Python 3.x
+
 import os
 import sys
+sys.path.insert(0, '/usr/lib/python2.7/dist-packages')
+
 import argparse
 import subprocess
 from onl.util import wget
@@ -14,7 +19,7 @@ ops = ap.parse_args()
 (ex, filename, directory) = wget(ops.url, extension=".swi", temp_directory='/mnt/onl/data' if ops.onl_data else None)
 
 if ex:
-    print ex
+    print(ex)
     sys.exit(1)
 
 with OnlMountContextReadWrite('ONL-IMAGES', None):

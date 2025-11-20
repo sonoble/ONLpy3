@@ -1,4 +1,7 @@
 #!/usr/bin/python
 ############################################################
+import sys
+sys.path.insert(0, '/usr/lib/python2.7/dist-packages')
+
 from onl.bootconfig import OnlBootConfigNet
 OnlBootConfigNet().main("onl-boot-config")

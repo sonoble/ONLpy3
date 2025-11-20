@@ -1,4 +1,7 @@
 #!/usr/bin/python
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
+# All syntax in this file is compatible with both Python 2.7 and Python 3.x
+
 ############################################################
 # <bsn.cl fy=2013 v=none>
 #
@@ -25,12 +28,12 @@ class OnlInfoObject(object):
     def __init__(self, d, klass=None):
         self._data = d
         if klass:
-            for (m,n) in klass.__dict__.iteritems():
+            for (m,n) in klass.__dict__.items():
                 if m == m.upper():
                     setattr(self, m, None)
 
-                for (k,v) in d.iteritems():
-                    for (m,n) in klass.__dict__.iteritems():
+                for (k,v) in d.items():
+                    for (m,n) in klass.__dict__.items():
                         if n == k:
                             setattr(self, m, v);
                             break
@@ -50,7 +53,7 @@ class OnlInfoObject(object):
 
     @staticmethod
     def string(d, indent=DEFAULT_INDENT):
-        return "\n".join( sorted("%s%s: %s" % (indent,k,v) for k,v in d.iteritems() if not k.startswith('_') and d[k] is not None and k != 'CRC'))
+        return "\n".join( sorted("%s%s: %s" % (indent,k,v) for k,v in d.items() if not k.startswith('_') and d[k] is not None and k != 'CRC'))
 
 
 ############################################################
@@ -142,12 +145,12 @@ class OnlPlatformBase(object):
                 self.platform_config = self.platform_config[self.platform()]
         elif os.path.exists(y2):
             with open(y2) as fd:
-                self.platform_config = yaml.load(fd)
+                self.platform_config = yaml.load(fd, Loader=yaml.SafeLoader)
             if self.platform() in self.platform_config:
                 self.platform_config = self.platform_config[self.platform()]
         elif os.path.exists(y1):
             with open(y1) as fd:
-                self.platform_config = yaml.load(fd)
+                self.platform_config = yaml.load(fd, Loader=yaml.SafeLoader)
             if 'default' in self.platform_config:
                 self.platform_config = self.platform_config['default']
         else:
@@ -160,9 +163,9 @@ class OnlPlatformBase(object):
     def add_info_json(self, name, f, klass=None, required=True):
         if os.path.exists(f):
             try:
-                d = json.load(file(f))
+                d = json.load(open(f))
                 self.add_info_dict(name, d, klass)
-            except ValueError, e:
+            except ValueError as e:
                 if required:
                     raise e
                 self.add_info_dict(name, {}, klass)
@@ -178,7 +181,7 @@ class OnlPlatformBase(object):
                 cpath = os.path.join(self.basedir(), subsys, "configs")
                 if os.path.isdir(cpath):
                     for config in os.listdir(cpath):
-                        with file(os.path.join(cpath, config)) as f:
+                        with open(os.path.join(cpath, config)) as f:
                             if not subsys in self.configs:
                                 self.configs[subsys] = {}
                             self.configs[subsys][config] = json.load(f)
@@ -230,7 +233,7 @@ class OnlPlatformBase(object):
             for e in [ ".ko", "" ]:
                 path = os.path.join(d, "%s%s" % (module, e))
                 if os.path.exists(path):
-                    cmd = "insmod %s %s" % (path, " ".join([ "%s=%s" % (k,v) for (k,v) in params.iteritems() ]))
+                    cmd = "insmod %s %s" % (path, " ".join([ "%s=%s" % (k,v) for (k,v) in params.items() ]))
                     subprocess.check_call(cmd, shell=True);
                     return True
                 else:
@@ -401,7 +404,7 @@ class OnlPlatformBase(object):
             m = os.path.join(self.basedir_onl(), "upgrade", type_, "manifest.json")
 
         if os.path.exists(m):
-            return (os.path.dirname(m), m, json.load(file(m)))
+            return (os.path.dirname(m), m, json.load(open(m)))
         else:
             return (None, None, None)
 
@@ -411,8 +414,8 @@ class OnlPlatformBase(object):
             try:
                 with open("%s/new_device" % bus, "w") as f:
                     f.write("%s 0x%x\n" % (driver, addr))
-            except Exception, e:
-                print "Unexpected error initialize device %s:0x%x:%s: %s" % (driver, addr, bus, e)
+            except Exception as e:
+                print("Unexpected error initialize device %s:0x%x:%s: %s" % (driver, addr, bus, e))
         else:
             print("Device %s:%x:%s already exists." % (driver, addr, bus))
 
@@ -445,7 +448,7 @@ class OnlPlatformBase(object):
             if fmt == 'yaml':
                 return yamlstr
             else:
-                data = yaml.load(yamlstr)
+                data = yaml.load(yamlstr, Loader=yaml.SafeLoader)
                 if fmt == 'json':
                     return json.dumps(data, indent=2)
                 else:

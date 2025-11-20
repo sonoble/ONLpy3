@@ -6,6 +6,7 @@ Mount a directory specified in $SWI.
 """
 
 import os, sys
+sys.path.insert(0, '/usr/lib/python2.7/dist-packages')
 import shutil
 import logging
 

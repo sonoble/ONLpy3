@@ -1,4 +1,7 @@
 #!/usr/bin/python
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
+# All syntax in this file is compatible with both Python 2.7 and Python 3.x
+
 import os
 import sys
 import platform
@@ -33,7 +36,7 @@ class MountManager(object):
 
     def is_dev_mounted(self, device):
         self.read_proc_mounts()
-        for (k, v) in self.mounts.iteritems():
+        for (k, v) in self.mounts.items():
             if v['dev'] == device:
                 return True
         return False
@@ -41,7 +44,7 @@ class MountManager(object):
     def mount(self, device, directory, mode='r', timeout=5):
 
         mountargs = [ str(mode) ]
-        currentItems = [x for x in self.mounts.iteritems() if x[1]['dev'] == device]
+        currentItems = [x for x in self.mounts.items() if x[1]['dev'] == device]
         if currentItems:
             currentDirectory, current = currentItems[0]
             if current['mode'] == mode:
@@ -63,7 +66,11 @@ class MountManager(object):
             self.logger.debug("%s not mounted @ %s. It will be mounted %s" % (device, directory, mode))
 
         try:
-            p = device.find('ubi')
+            # Handle both str and bytes for device
+            if isinstance(device, bytes):
+                p = device.find(b'ubi')
+            else:
+                p = str(device).find('ubi')
             if p < 0:
                 cmd = "mount -o %s %s %s" % (','.join(mountargs), device, directory)
             else:
@@ -71,7 +78,7 @@ class MountManager(object):
 
             self.logger.debug("+ %s" % cmd)
             subprocess.check_call(cmd, shell=True)
-        except subprocess.CalledProcessError, e:
+        except subprocess.CalledProcessError as e:
             self.logger.error("Mount failed: '%s'" % e.output)
             return False
 
@@ -101,7 +108,7 @@ class MountManager(object):
             self.read_proc_mounts()
             return True
 
-        except subprocess.CalledProcessError,e:
+        except subprocess.CalledProcessError as e:
             self.logger.error("Could not unmount %s @ %s: %s" % (device, directory, e.output))
 
 
@@ -130,7 +137,7 @@ class OnlMountManager(object):
         self.mm = MountManager(logger)
 
         if os.path.exists(mdata):
-            mdata = yaml.load(open(mdata, "r"));
+            mdata = yaml.load(open(mdata, "r"), Loader=yaml.SafeLoader)
 
         self.mdata = mdata
         self.logger = logger if logger else logging.getLogger(self.__class__.__name__)
@@ -230,7 +237,7 @@ class OnlMountManager(object):
             out = subprocess.check_output(cmd, shell=True)
             self.logger.info("%s [ %s ] is clean." % (device, label))
             return True
-        except subprocess.CalledProcessError, e:
+        except subprocess.CalledProcessError as e:
             self.logger.error("fsck failed: %s" % e.output)
             return False
 
@@ -258,7 +265,7 @@ class OnlMountManager(object):
         if 'all' in labels:
             labels = list(labels)
             labels.remove('all')
-            labels = labels + self.mdata['mounts'].keys()
+            labels = labels + list(self.mdata['mounts'].keys())
 
         def _f(label):
             """skip labels that do not resolve to a block device (ideally, optional ones)"""

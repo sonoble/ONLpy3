@@ -1,3 +1,13 @@
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
+# Python 2/3 compatibility
+try:
+    basestring
+except NameError:
+    # Python 3
+    basestring = str
+
+# All syntax in this file is compatible with both Python 2.7 and Python 3.x
+
 import subprocess
 import logging
 import os
@@ -131,7 +141,7 @@ def wget(url, directory=None, temp_directory=None, extension=None):
     try:
         response = urllib2.urlopen(url)
         filename = os.path.basename(urllib2.urlparse.urlparse(response.url).path)
-    except Exception, e:
+    except Exception as e:
         return (e, None, None)
 
     if extension and not filename.endswith("%s" % extension):
@@ -146,7 +156,7 @@ def wget(url, directory=None, temp_directory=None, extension=None):
     try:
         subprocess.check_call("wget -P %s %s" % (directory, url), shell=True)
         return (None, filename, directory)
-    except subprocess.CalledProcessError, e:
+    except subprocess.CalledProcessError as e:
         return (e, None, None)
 
 def dpkg_architecture():

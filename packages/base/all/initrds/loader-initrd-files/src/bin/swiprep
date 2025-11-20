@@ -168,7 +168,18 @@ fi
 
 if test "$mode_install"; then
   echo "extracting rootfs $workdir/rootfs.sqsh --> $destdir"
-  unsquashfs -f -d "$destdir" "$workdir/rootfs.sqsh"
+  # Mount and tar instead of unsquashfs to avoid threading deadlock and preserve symlinks
+  sqsh_mount=$(mktemp -d)
+  mount -t squashfs -o loop,ro "$workdir/rootfs.sqsh" "$sqsh_mount"
+  if test $? -ne 0; then
+    echo "*** failed to mount squashfs" 1>&2
+    rmdir "$sqsh_mount"
+    exit 1
+  fi
+  # Use tar to properly preserve symlinks and directory structure (critical for merged-usr /sbin -> usr/sbin)
+  tar -C "$sqsh_mount" -cf - . | tar -C "$destdir" -xf -
+  umount "$sqsh_mount"
+  rmdir "$sqsh_mount"
   if test ! -f "$destdir/lib/vendor-config/onl/install/lib.sh"; then
     echo "*** invalid squashfs contents" 1>&2
     exit 1

@@ -3,6 +3,7 @@
 top-level install app
 """
 
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
 import subprocess
 import sys, os
 import logging
@@ -14,11 +15,11 @@ import urllib
 import tempfile
 import time
 
-from InstallUtils import InitrdContext
-from InstallUtils import SubprocessMixin
-from InstallUtils import ProcMountsParser
-from ShellApp import OnieBootContext, OnieSysinfo
-import ConfUtils, BaseInstall
+from .InstallUtils import InitrdContext
+from .InstallUtils import SubprocessMixin
+from .InstallUtils import ProcMountsParser
+from .ShellApp import OnieBootContext, OnieSysinfo
+from . import ConfUtils, BaseInstall
 
 class App(SubprocessMixin, object):
 

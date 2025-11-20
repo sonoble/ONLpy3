@@ -1,3 +1,6 @@
+# Python 2/3 compatibility - reviewed and fixed 2025-11-20
+# All syntax in this file is compatible with both Python 2.7 and Python 3.x
+
 """App.py
 
 Application code for onl-install.
@@ -168,7 +171,7 @@ class App(SubprocessMixin):
                 cmd = ('chroot', ctx.dir, "/usr/bin/onl-install", "--force",)
             try:
                 self.check_call(cmd)
-            except subprocess.CalledProcessError, what:
+            except subprocess.CalledProcessError as what:
                 pass
 
     def run(self):

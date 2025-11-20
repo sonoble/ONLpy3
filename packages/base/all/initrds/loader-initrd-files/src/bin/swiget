@@ -6,6 +6,7 @@ Retrieve/resolve a SWI file to the local filesystem path.
 """
 
 import sys, os
+sys.path.insert(0, '/usr/lib/python2.7/dist-packages')
 import time
 import urllib
 import subprocess
